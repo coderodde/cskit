@@ -2,16 +2,25 @@ package net.coderodde.cskit;
 
 import java.util.List;
 import java.util.Random;
+import static net.coderodde.cskit.Utilities.allWeakEquals;
+import static net.coderodde.cskit.Utilities.debugPrintArray;
 import static net.coderodde.cskit.Utilities.generateSimpleGraph;
+import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
 import static net.coderodde.cskit.Utilities.isConnectedPath;
+import static net.coderodde.cskit.Utilities.isSorted;
 import static net.coderodde.cskit.Utilities.line;
-import static net.coderodde.cskit.Utilities.pathsAreSame;
 import static net.coderodde.cskit.Utilities.title;
+import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.p2psp.BidirectionalBreadthFirstSearchFinder;
-import net.coderodde.cskit.p2psp.BreadthFirstSearchFinder;
-import net.coderodde.cskit.p2psp.ParallelBidirectionalBFSFinder;
-import net.coderodde.cskit.p2psp.UniformCostPathFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.BidirectionalBreadthFirstSearchFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.BreadthFirstSearchFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.ParallelBidirectionalBFSFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.UniformCostPathFinder;
+import net.coderodde.cskit.sorting.CombSort;
+import net.coderodde.cskit.sorting.CountingSort;
+import net.coderodde.cskit.sorting.NaturalMergeSort;
+import net.coderodde.cskit.sorting.Range;
+import net.coderodde.cskit.sorting.TreeSort;
 /**
  * Hello from cskit.
  *
@@ -19,7 +28,9 @@ import net.coderodde.cskit.p2psp.UniformCostPathFinder;
 public class App{
 
     public static void main(String... args) {
-        profileBreadthFirstSearchAlgorithms();
+//        profileBreadthFirstSearchAlgorithms();
+        profileObjectSortingAlgorithms();
+        debugNaturalMergeSort();
     }
 
     public static void profileBreadthFirstSearchAlgorithms() {
@@ -104,5 +115,122 @@ public class App{
                 + ok3);
 
         line();
+
+        System.gc();
+    }
+
+    private static void profileObjectSortingAlgorithms() {
+        System.out.println();
+        title("Object sorting algorithms");
+        title2("Small amount of different elements, random order");
+
+        final int SIZE = 200000;
+        final long SEED = System.currentTimeMillis();
+        final Random r = new Random(SEED);
+
+        Integer[] array1 = getRandomIntegerArray(SIZE, 0, 100, r);
+        Integer[] array2 = array1.clone();
+        Integer[] array3 = array1.clone();
+        Integer[] array4 = array1.clone();
+
+        //// Comb sort ////
+
+        long ta = System.currentTimeMillis();
+        new CombSort<Integer>().sort(array1);
+        long tb = System.currentTimeMillis();
+
+        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array1, new Range(0, array1.length - 1)));
+
+        //// Counting sort ////
+
+        ta = System.currentTimeMillis();
+        new CountingSort<Integer>().sort(array2);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array2, new Range(0, array2.length - 1)));
+
+        //// Tree sort ////
+
+        ta = System.currentTimeMillis();
+        new TreeSort<Integer>().sort(array3);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array3, new Range(0, array3.length - 1)));
+
+        //// Natural merge sort ////
+
+        ta = System.currentTimeMillis();
+        new NaturalMergeSort<Integer>().sort(array4);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Natural merge sort in " + (tb - ta)
+                + " ms. Sorted: "
+                + isSorted(array4, new Range(0, array4.length - 1)));
+
+        line();
+
+        System.out.println("All arrays are equal: "
+                + allWeakEquals(array1, array2, array3, array4));
+
+        array1 = getRandomIntegerArray(SIZE, r);
+        array2 = array1.clone();
+        array3 = array1.clone();
+        array4 = array1.clone();
+
+        System.gc();
+
+        title2("As random as possible.");
+
+        //// Comb sort ////
+
+        ta = System.currentTimeMillis();
+        new CombSort<Integer>().sort(array1);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array1, new Range(0, array1.length - 1)));
+
+        //// Counting sort ////
+
+        ta = System.currentTimeMillis();
+        new CountingSort<Integer>().sort(array2);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array2, new Range(0, array2.length - 1)));
+
+        //// Tree sort ////
+
+        ta = System.currentTimeMillis();
+        new TreeSort<Integer>().sort(array3);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array3, new Range(0, array3.length - 1)));
+
+        //// Natural mergesort ////
+
+        ta = System.currentTimeMillis();
+        new NaturalMergeSort<Integer>().sort(array4);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array4, new Range(0, array3.length - 1)));
+
+        line();
+
+        System.out.println("All arrays are equal: "
+                + allWeakEquals(array1, array2, array3, array4));
+    }
+
+    private static void debugNaturalMergeSort() {
+        final long SEED = System.currentTimeMillis();
+        Integer[] array = getRandomIntegerArray(20, 0, 100, new Random(SEED));
+        debugPrintArray(array);
+        new NaturalMergeSort<Integer>().sort(array);
+        debugPrintArray(array);
     }
 }
