@@ -208,6 +208,11 @@ public class Utilities {
         }
     }
 
+    public static final <E extends Comparable<? super E>>
+            boolean isSorted(E[] array) {
+        return isSorted(array, new Range(0, array.length - 1));
+    }
+
     public static final Integer[] getRandomIntegerArray(int size,
                                                         int min,
                                                         int max,
@@ -333,5 +338,26 @@ public class Utilities {
         }
 
         System.out.println();
+    }
+
+    public static final Integer[] getAscendingArray(int size) {
+        Integer[] array = new Integer[size];
+
+        for (int i = 0; i < size; ++i) {
+            array[i] = i;
+        }
+
+        return array;
+    }
+
+    public static final <E> void shuffle(E[] array, Random r) {
+        for (int i = 0; i < array.length / 2; ++i) {
+            int j = r.nextInt(array.length);
+            int k = r.nextInt(array.length);
+
+            E tmp = array[j];
+            array[j] = array[k];
+            array[k] = tmp;
+        }
     }
 }

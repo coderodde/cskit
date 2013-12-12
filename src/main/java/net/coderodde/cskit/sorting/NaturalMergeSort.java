@@ -24,54 +24,10 @@ implements ObjectSortingAlgorithm<E> {
     }
 
     private void ascendingSort(E[] array, int from, int to) {
-        RunQueue queue = new RunScanner<E>().scan(array, from, to);
-        E[] buffer = array.clone();
-        Run last = queue.last();
 
-        while (queue.size() > 1) {
-            Run left = queue.first();
-            Run right = queue.second();
-
-            if (left == last) {
-                queue.bounce();
-                continue;
-            }
-
-            int l = left.from;
-            int r = right.from;
-            int i = l;
-            final int LMAX = left.to + 1;
-            final int RMAX = right.to + 1;
-
-            while (l < LMAX && r < RMAX) {
-                buffer[i++] = array[r].compareTo(array[i]) < 0 ?
-                             array[r++] :
-                             array[l++];
-            }
-
-            while (l < LMAX) buffer[i++] = array[l++];
-            while (r < RMAX) buffer[i++] = array[r++];
-
-            i = left.from;
-            final int e = right.to + 1;
-
-            while (i < e) {
-                array[i] = buffer[i];
-                ++i;
-            }
-
-            if (right == last) {
-                queue.merge();
-                queue.bounce();
-                last = queue.last();
-            } else {
-                queue.merge();
-                queue.bounce();
-            }
-        }
     }
 
     private void descendingSort(E[] array, int from, int to) {
-        RunQueue queue = new RunScanner<E>().scan(array, to, from);
+        
     }
 }

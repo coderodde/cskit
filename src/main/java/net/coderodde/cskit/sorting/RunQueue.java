@@ -1,7 +1,7 @@
 package net.coderodde.cskit.sorting;
 
 /**
- *
+ * This class implements a queue specialized for natural merge sort.
  *
  * @author Rodion Efremov
  * @version 1.618 (9.12.2013)

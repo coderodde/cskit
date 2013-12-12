@@ -1,5 +1,6 @@
 package net.coderodde.cskit;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import static net.coderodde.cskit.Utilities.allWeakEquals;
@@ -16,8 +17,10 @@ import net.coderodde.cskit.graph.p2psp.uniform.BidirectionalBreadthFirstSearchFi
 import net.coderodde.cskit.graph.p2psp.uniform.BreadthFirstSearchFinder;
 import net.coderodde.cskit.graph.p2psp.uniform.ParallelBidirectionalBFSFinder;
 import net.coderodde.cskit.graph.p2psp.uniform.UniformCostPathFinder;
+import net.coderodde.cskit.sorting.BatchersSort;
 import net.coderodde.cskit.sorting.CombSort;
 import net.coderodde.cskit.sorting.CountingSort;
+import net.coderodde.cskit.sorting.IterativeMergesort;
 import net.coderodde.cskit.sorting.NaturalMergeSort;
 import net.coderodde.cskit.sorting.Range;
 import net.coderodde.cskit.sorting.TreeSort;
@@ -132,6 +135,9 @@ public class App{
         Integer[] array2 = array1.clone();
         Integer[] array3 = array1.clone();
         Integer[] array4 = array1.clone();
+        Integer[] array5 = array1.clone();
+        Integer[] array6 = array1.clone();
+        Integer[] array10 = array1.clone();
 
         //// Comb sort ////
 
@@ -140,7 +146,7 @@ public class App{
         long tb = System.currentTimeMillis();
 
         System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array1, new Range(0, array1.length - 1)));
+                + isSorted(array1));
 
         //// Counting sort ////
 
@@ -149,7 +155,7 @@ public class App{
         tb = System.currentTimeMillis();
 
         System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array2, new Range(0, array2.length - 1)));
+                + isSorted(array2));
 
         //// Tree sort ////
 
@@ -158,7 +164,7 @@ public class App{
         tb = System.currentTimeMillis();
 
         System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array3, new Range(0, array3.length - 1)));
+                + isSorted(array3));
 
         //// Natural merge sort ////
 
@@ -168,17 +174,50 @@ public class App{
 
         System.out.println("Natural merge sort in " + (tb - ta)
                 + " ms. Sorted: "
-                + isSorted(array4, new Range(0, array4.length - 1)));
+                + isSorted(array4));
+
+        //// Batcher's method ////
+
+        ta = System.currentTimeMillis();
+        new BatchersSort<Integer>().sort(array5);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Batcher's method in " + (tb - ta)
+                + " ms. Sorted: "
+                + isSorted(array5));
+
+        //// Iterative mergesort ////
+
+        ta = System.currentTimeMillis();
+        new IterativeMergesort<Integer>().sort(array6);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Iterative mergesort in " + (tb - ta)
+                + " ms. Sorted: "
+                + isSorted(array6));
+
+        //// Arrays.sort ////
+
+        ta = System.currentTimeMillis();
+        Arrays.sort(array10);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Arrays.sort() in " + (tb - ta)
+                + " ms. Sorted: "
+                + isSorted(array10));
 
         line();
 
         System.out.println("All arrays are equal: "
-                + allWeakEquals(array1, array2, array3, array4));
+                + allWeakEquals(array1, array2, array3, array5, array6, array10));
 
         array1 = getRandomIntegerArray(SIZE, r);
         array2 = array1.clone();
         array3 = array1.clone();
         array4 = array1.clone();
+        array5 = array1.clone();
+        array6 = array1.clone();
+        array10 = array1.clone();
 
         System.gc();
 
@@ -191,7 +230,7 @@ public class App{
         tb = System.currentTimeMillis();
 
         System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array1, new Range(0, array1.length - 1)));
+                + isSorted(array1));
 
         //// Counting sort ////
 
@@ -200,7 +239,7 @@ public class App{
         tb = System.currentTimeMillis();
 
         System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array2, new Range(0, array2.length - 1)));
+                + isSorted(array2));
 
         //// Tree sort ////
 
@@ -209,7 +248,7 @@ public class App{
         tb = System.currentTimeMillis();
 
         System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array3, new Range(0, array3.length - 1)));
+                + isSorted(array3));
 
         //// Natural mergesort ////
 
@@ -217,13 +256,41 @@ public class App{
         new NaturalMergeSort<Integer>().sort(array4);
         tb = System.currentTimeMillis();
 
-        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-                + isSorted(array4, new Range(0, array3.length - 1)));
+        System.out.println("Natural merge sort in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array4));
+
+        //// Batcher's method ////
+
+        ta = System.currentTimeMillis();
+        new BatchersSort<Integer>().sort(array5);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Batcher's method in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array5));
+
+        //// Iterative merge sort ////
+
+        ta = System.currentTimeMillis();
+        new IterativeMergesort<Integer>().sort(array6);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Iterative merge sort in " + (tb - ta)
+                + " ms. Sorted: "
+                + isSorted(array6));
+
+        //// Arrays.sort ////
+
+        ta = System.currentTimeMillis();
+        Arrays.sort(array10);
+        tb = System.currentTimeMillis();
+
+        System.out.println("Arrays.sort() in " + (tb - ta) + " ms. Sorted: "
+                + isSorted(array10));
 
         line();
 
         System.out.println("All arrays are equal: "
-                + allWeakEquals(array1, array2, array3, array4));
+                + allWeakEquals(array1, array2, array3, array5, array6, array10));
     }
 
     private static void debugNaturalMergeSort() {

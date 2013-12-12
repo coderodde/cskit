@@ -27,6 +27,11 @@ public class Run {
         this.to = to;
     }
 
+    public boolean equals(Object o) {
+        Run other = (Run) o;
+        return from == other.from && to == other.to;
+    }
+
     @Override
     public String toString() {
         return "[" + from + ", " + to + "]";
