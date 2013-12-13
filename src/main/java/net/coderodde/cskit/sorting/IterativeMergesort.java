@@ -39,6 +39,9 @@ implements ObjectSortingAlgorithm<E> {
         if ((NPASSES & 1) == 0) {
             source = array;
             destination = buffer;
+        } else {
+            source = buffer;
+            destination = array;
         }
 
         for (int chunkSize = 1; chunkSize < N; chunkSize <<= 1) {
