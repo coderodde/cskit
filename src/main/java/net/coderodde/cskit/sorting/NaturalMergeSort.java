@@ -24,7 +24,7 @@ implements ObjectSortingAlgorithm<E> {
     }
 
     private void ascendingSort(E[] array, int from, int to) {
-        RunQueue queue = new RunScanner<E>().scan(array, from, to);
+        RunQueue queue = new RunScanner<E>().scanAndReturnRunQueue(array, from, to);
         E[] buffer = array.clone();
         Run last = queue.last();
 
@@ -88,6 +88,6 @@ implements ObjectSortingAlgorithm<E> {
     }
 
     private void descendingSort(E[] array, int from, int to) {
-        RunQueue queue = new RunScanner<E>().scan(array, to, from);
+        RunQueue queue = new RunScanner<E>().scanAndReturnRunQueue(array, to, from);
     }
 }

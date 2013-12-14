@@ -6,7 +6,7 @@ package net.coderodde.cskit.sorting;
  * @author Rodion Efremov
  * @version 1.618 (12.12.2013)
  */
-public class IterativeMergesort<E extends Comparable<? super E>>
+public class IterativeMergeSort<E extends Comparable<? super E>>
 implements ObjectSortingAlgorithm<E> {
 
     @Override

@@ -11,15 +11,23 @@ import static net.coderodde.cskit.Utilities.reverse;
  */
 public class RunScanner<E extends Comparable<? super E>> {
 
-    public RunQueue scan(E[] array, int from, int to) {
+    RunQueue scanAndReturnRunQueue(E[] array, int from, int to) {
         if (from <= to) {
-            return ascendingScan(array, from, to);
+            return ascendingScanQueue(array, from, to);
         } else {
-            return descendingScan(array, to, from);
+            return descendingScanQueue(array, to, from);
         }
     }
 
-    private RunQueue ascendingScan(E[] array, int from, int to) {
+    RunHeap<E> scanAndReturnRunHeap(E[] array, int from, int to) {
+        if (from <= to) {
+            return ascendingScanHeap(array, from, to);
+        } else {
+            return descendingScanHeap(array, to, from);
+        }
+    }
+
+    private RunQueue ascendingScanQueue(E[] array, int from, int to) {
         if (from == to) {
             return new RunQueue(new Run(from, from));
         }
@@ -90,7 +98,7 @@ public class RunScanner<E extends Comparable<? super E>> {
         return queue;
     }
 
-    private RunQueue descendingScan(E[] array, int from, int to) {
+    private RunQueue descendingScanQueue(E[] array, int from, int to) {
         RunQueue queue;
         int head = from;
         int left = from;
@@ -155,5 +163,145 @@ public class RunScanner<E extends Comparable<? super E>> {
         }
 
         return queue;
+    }
+
+    private RunHeap<E> ascendingScanHeap(E[] array, int from, int to) {
+        RunHeap<E> heap = new RunHeap<E>((to - from + 1) / 2 + 1, array);
+
+        if (from == to) {
+            heap.insert(new Run(from, from));
+            return heap;
+        }
+
+        int head = from;
+        int left = from;
+        int right = left + 1;
+        final int last = to;
+
+        if (array[left++].compareTo(array[right++]) <= 0) {
+            while (left < last && array[left].compareTo(array[right]) <= 0) {
+                left++;
+                right++;
+            }
+
+            heap.insert(new Run(head, left));
+        } else {
+            while (left < last && array[left].compareTo(array[right]) > 0) {
+                left++;
+                right++;
+            }
+
+            Run run = new Run(head, left);
+            reverse(array, head, left);
+            heap.insert(run);
+        }
+
+        left++;
+        right++;
+
+        if (left == last) {
+            heap.insert(new Run(left, left));
+            return heap;
+        }
+
+        while (left < last) {
+            head = left;
+
+            if (array[left++].compareTo(array[right++]) <= 0) {
+                while (left < last
+                        && array[left].compareTo(array[right]) <= 0) {
+                    left++;
+                    right++;
+                }
+
+                heap.insert(new Run(head, left));
+            } else {
+                while (left < last
+                        && array[left].compareTo(array[right]) > 0) {
+                    left++;
+                    right++;
+                }
+
+                Run run = new Run(head, left);
+                reverse(array, head, left);
+                heap.insert(run);
+            }
+
+            left++;
+            right++;
+        }
+
+        if (left == last) {
+            heap.insert(new Run(left, left));
+        }
+
+        return heap;
+    }
+
+    private RunHeap<E> descendingScanHeap(E[] array, int from, int to) {
+        RunHeap<E> heap = new RunHeap<E>(array.length / 2 + 1, array);
+        int head = from;
+        int left = from;
+        int right = left + 1;
+        final int last = to;
+
+        if (array[left++].compareTo(array[right++]) >= 0) {
+            while (left < last && array[left].compareTo(array[right]) >= 0) {
+                left++;
+                right++;
+            }
+
+            heap.insert(new Run(head, left));
+        } else {
+            while (left < last && array[left].compareTo(array[right]) < 0) {
+                left++;
+                right++;
+            }
+
+            Run run = new Run(head, left);
+            reverse(array, head, left);
+            heap.insert(new Run(head, left));
+        }
+
+        left++;
+        right++;
+
+        if (left == last) {
+            heap.insert(new Run(left, left));
+            return heap;
+        }
+
+        while (left < last) {
+            head = left;
+
+            if (array[left++].compareTo(array[right++]) >= 0) {
+                while (left < last
+                        && array[left].compareTo(array[right]) >= 0) {
+                    left++;
+                    right++;
+                }
+
+                heap.insert(new Run(head, left));
+            } else {
+                while (left < last
+                        && array[left].compareTo(array[right]) < 0) {
+                    left++;
+                    right++;
+                }
+
+                Run run = new Run(head, left);
+                reverse(array, head, left);
+                heap.insert(run);
+            }
+
+            left++;
+            right++;
+        }
+
+        if (left == last) {
+            heap.insert(new Run(left, left));
+        }
+
+        return heap;
     }
 }
