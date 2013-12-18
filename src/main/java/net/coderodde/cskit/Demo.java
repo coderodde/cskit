@@ -3,16 +3,29 @@ package net.coderodde.cskit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import static net.coderodde.cskit.Utilities.Triple;
 import static net.coderodde.cskit.Utilities.allWeakEquals;
 import static net.coderodde.cskit.Utilities.generateSimpleGraph;
+import static net.coderodde.cskit.Utilities.getPathCost;
 import static net.coderodde.cskit.Utilities.getPresortedArray;
+import static net.coderodde.cskit.Utilities.getRandomGraph;
 import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
 import static net.coderodde.cskit.Utilities.isConnectedPath;
 import static net.coderodde.cskit.Utilities.isSorted;
 import static net.coderodde.cskit.Utilities.line;
+import static net.coderodde.cskit.Utilities.pathsAreSame;
 import static net.coderodde.cskit.Utilities.title;
 import static net.coderodde.cskit.Utilities.title2;
+import net.coderodde.cskit.ds.pq.BinaryHeap;
+import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
+import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.p2psp.general.AStarFinder;
+import net.coderodde.cskit.graph.p2psp.general.BidirectionalDijkstraFinder;
+import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
+import net.coderodde.cskit.graph.p2psp.general.DijkstraFinder;
+import net.coderodde.cskit.graph.p2psp.general.EuclidianMetric;
+import net.coderodde.cskit.graph.p2psp.general.GeneralPathFinder;
 import net.coderodde.cskit.graph.p2psp.uniform.BidirectionalBreadthFirstSearchFinder;
 import net.coderodde.cskit.graph.p2psp.uniform.BreadthFirstSearchFinder;
 import net.coderodde.cskit.graph.p2psp.uniform.ParallelBidirectionalBFSFinder;
@@ -24,8 +37,8 @@ import net.coderodde.cskit.sorting.HeapSelectionSort;
 import net.coderodde.cskit.sorting.IterativeMergeSort;
 import net.coderodde.cskit.sorting.NaturalMergeSort;
 import net.coderodde.cskit.sorting.ObjectSortingAlgorithm;
-import net.coderodde.cskit.sorting.Range;
 import net.coderodde.cskit.sorting.TreeSort;
+
 /**
  * Hello from cskit.
  *
@@ -33,7 +46,6 @@ import net.coderodde.cskit.sorting.TreeSort;
 public class Demo{
 
     public static void main(String... args) {
-        profileBreadthFirstSearchAlgorithms();
         profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
                                        new CombSort<Integer>(),
                                        new CountingSort<Integer>(),
@@ -41,6 +53,9 @@ public class Demo{
                                        new IterativeMergeSort<Integer>(),
                                        new NaturalMergeSort<Integer>(),
                                        new TreeSort<Integer>());
+//        profileBinaryHeap();
+        profileShortestPathAlgorithms();
+        profileBreadthFirstSearchAlgorithms();
     }
 
     public static void profileBreadthFirstSearchAlgorithms() {
@@ -228,624 +243,103 @@ public class Demo{
         System.out.println("All arrays same: " + allWeakEquals(arrays));
     }
 
-//    private static void profileObjectSortingAlgorithmsOld() {
-//        System.out.println();
-//
-//        int SIZE = 200000;
-//        final long SEED = System.currentTimeMillis();
-//        final Random r = new Random(SEED);
-//
-//        title("Object sorting algorithms");
-//        title2("Small amount of different elements, random order, " + SIZE
-//                + " elements");
-//
-//
-//        Integer[] array1 = getRandomIntegerArray(SIZE, 0, 100, r);
-//        Integer[] array2 = array1.clone();
-//        Integer[] array3 = array1.clone();
-//        Integer[] array4 = array1.clone();
-//        Integer[] array5 = array1.clone();
-//        Integer[] array6 = array1.clone();
-//        Integer[] array7 = array1.clone();
-//        Integer[] array10 = array1.clone();
-//
-//        //// Comb sort ////
-//
-//        long ta = System.currentTimeMillis();
-//        new CombSort<Integer>().sort(array1);
-//        long tb = System.currentTimeMillis();
-//
-//        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array1));
-//
-//        //// Counting sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CountingSort<Integer>().sort(array2);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array2));
-//
-//        //// Tree sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new TreeSort<Integer>().sort(array3);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array3));
-//
-//        //// Natural merge sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new NaturalMergeSort<Integer>().sort(array4);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Natural merge sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array4));
-//
-//        //// Batcher's method ////
-//
-//        ta = System.currentTimeMillis();
-//        new BatchersSort<Integer>().sort(array5);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Batcher's method in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array5));
-//
-//        //// Iterative mergesort ////
-//
-//        ta = System.currentTimeMillis();
-//        new IterativeMergeSort<Integer>().sort(array6);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Iterative mergesort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array6));
-//
-//        //// Heap-selection sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new HeapSelectionSort<Integer>().sort(array7);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Heap-selection sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array7));
-//
-//        //// Arrays.sort ////
-//
-//        ta = System.currentTimeMillis();
-//        Arrays.sort(array10);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Arrays.sort() in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array10));
-//
-//        line();
-//
-//        System.out.println("All arrays are equal: "
-//                + allWeakEquals(array1,
-//                                array2,
-//                                array3,
-//                                array4,
-//                                array5,
-//                                array6,
-//                                array7,
-//                                array10));
-//        SIZE = 20000;
-//
-//        title2("Small amount of different elements, random order, " + SIZE
-//                + " elements");
-//
-//        array1 = getRandomIntegerArray(SIZE, 0, 100, r);
-//        array2 = array1.clone();
-//        array3 = array1.clone();
-//        array4 = array1.clone();
-//        array5 = array1.clone();
-//        array6 = array1.clone();
-//        array7 = array1.clone();
-//        array10 = array1.clone();
-//
-//        //// Comb sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CombSort<Integer>().sort(array1);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array1));
-//
-//        //// Counting sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CountingSort<Integer>().sort(array2);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array2));
-//
-//        //// Tree sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new TreeSort<Integer>().sort(array3);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array3));
-//
-//        //// Natural merge sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new NaturalMergeSort<Integer>().sort(array4);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Natural merge sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array4));
-//
-//        //// Batcher's method ////
-//
-//        ta = System.currentTimeMillis();
-//        new BatchersSort<Integer>().sort(array5);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Batcher's method in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array5));
-//
-//        //// Iterative mergesort ////
-//
-//        ta = System.currentTimeMillis();
-//        new IterativeMergeSort<Integer>().sort(array6);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Iterative mergesort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array6));
-//
-//        //// Heap-selection sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new HeapSelectionSort<Integer>().sort(array7);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Heap-selection sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array7));
-//
-//        //// Arrays.sort ////
-//
-//        ta = System.currentTimeMillis();
-//        Arrays.sort(array10);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Arrays.sort() in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array10));
-//
-//        line();
-//
-//        System.out.println("All arrays are equal: "
-//                + allWeakEquals(array1,
-//                                array2,
-//                                array3,
-//                                array4,
-//                                array5,
-//                                array6,
-//                                array7,
-//                                array10));
-//
-//        SIZE = 200000;
-//
-//        array1 = getRandomIntegerArray(SIZE, r);
-//        array2 = array1.clone();
-//        array3 = array1.clone();
-//        array4 = array1.clone();
-//        array5 = array1.clone();
-//        array6 = array1.clone();
-//        array7 = array1.clone();
-//        array10 = array1.clone();
-//
-//        System.gc();
-//
-//        title2("As random as possible, " + SIZE + " elements");
-//
-//        //// Comb sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CombSort<Integer>().sort(array1);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array1));
-//
-//        //// Counting sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CountingSort<Integer>().sort(array2);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array2));
-//
-//        //// Tree sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new TreeSort<Integer>().sort(array3);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array3));
-//
-//        //// Natural mergesort ////
-//
-//        ta = System.currentTimeMillis();
-//        new NaturalMergeSort<Integer>().sort(array4);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Natural merge sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array4));
-//
-//        //// Batcher's method ////
-//
-//        ta = System.currentTimeMillis();
-//        new BatchersSort<Integer>().sort(array5);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Batcher's method in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array5));
-//
-//        //// Iterative merge sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new IterativeMergeSort<Integer>().sort(array6);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Iterative merge sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array6));
-//
-//        //// Heap-selection sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new HeapSelectionSort<Integer>().sort(array7);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Heap-selection sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array7));
-//
-//        //// Arrays.sort ////
-//
-//        ta = System.currentTimeMillis();
-//        Arrays.sort(array10);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Arrays.sort() in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array10));
-//
-//        line();
-//
-//        System.out.println("All arrays are equal: "
-//                + allWeakEquals(array1,
-//                                array2,
-//                                array3,
-//                                array4,
-//                                array5,
-//                                array6,
-//                                array7,
-//                                array10));
-//
-//        SIZE = 20000;
-//
-//        array1 = getRandomIntegerArray(SIZE, r);
-//        array2 = array1.clone();
-//        array3 = array1.clone();
-//        array4 = array1.clone();
-//        array5 = array1.clone();
-//        array6 = array1.clone();
-//        array7 = array1.clone();
-//        array10 = array1.clone();
-//
-//        System.gc();
-//
-//        title2("As random as possible, " + SIZE + " elements");
-//
-//        //// Comb sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CombSort<Integer>().sort(array1);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array1));
-//
-//        //// Counting sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CountingSort<Integer>().sort(array2);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array2));
-//
-//        //// Tree sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new TreeSort<Integer>().sort(array3);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array3));
-//
-//        //// Natural mergesort ////
-//
-//        ta = System.currentTimeMillis();
-//        new NaturalMergeSort<Integer>().sort(array4);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Natural merge sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array4));
-//
-//        //// Batcher's method ////
-//
-//        ta = System.currentTimeMillis();
-//        new BatchersSort<Integer>().sort(array5);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Batcher's method in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array5));
-//
-//        //// Iterative merge sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new IterativeMergeSort<Integer>().sort(array6);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Iterative merge sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array6));
-//
-//        //// Heap-selection sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new HeapSelectionSort<Integer>().sort(array7);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Heap-selection sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array7));
-//
-//        //// Arrays.sort ////
-//
-//        ta = System.currentTimeMillis();
-//        Arrays.sort(array10);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Arrays.sort() in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array10));
-//
-//        line();
-//
-//        System.out.println("All arrays are equal: "
-//                + allWeakEquals(array1,
-//                                array2,
-//                                array3,
-//                                array4,
-//                                array5,
-//                                array6,
-//                                array7,
-//                                array10));
-//
-//        SIZE = 200000;
-//        int RUNS = 16;
-//
-//        array1 = getPresortedArray(SIZE, RUNS);
-//        array2 = array1.clone();
-//        array3 = array1.clone();
-//        array4 = array1.clone();
-//        array5 = array1.clone();
-//        array6 = array1.clone();
-//        array7 = array1.clone();
-//        array10 = array1.clone();
-//
-//        System.gc();
-//
-//        title2("Presorted array of " + SIZE + " elements with " + RUNS
-//                + " runs");
-//
-//        //// Comb sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CombSort<Integer>().sort(array1);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array1));
-//
-//        //// Counting sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CountingSort<Integer>().sort(array2);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array2));
-//
-//        //// Tree sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new TreeSort<Integer>().sort(array3);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array3));
-//
-//        //// Natural mergesort ////
-//
-//        ta = System.currentTimeMillis();
-//        new NaturalMergeSort<Integer>().sort(array4);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Natural merge sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array4));
-//
-//        //// Batcher's method ////
-//
-//        ta = System.currentTimeMillis();
-//        new BatchersSort<Integer>().sort(array5);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Batcher's method in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array5));
-//
-//        //// Iterative merge sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new IterativeMergeSort<Integer>().sort(array6);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Iterative merge sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array6));
-//
-//        //// Heap-selection sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new HeapSelectionSort<Integer>().sort(array7);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Heap-selection sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array7));
-//
-//        //// Arrays.sort ////
-//
-//        ta = System.currentTimeMillis();
-//        Arrays.sort(array10);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Arrays.sort() in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array10));
-//
-//        line();
-//
-//        System.out.println("All arrays are equal: "
-//                + allWeakEquals(array1,
-//                                array2,
-//                                array3,
-//                                array4,
-//                                array5,
-//                                array6,
-//                                array7,
-//                                array10));
-//
-//        SIZE = 20000;
-//        RUNS = 16;
-//
-//        array1 = getPresortedArray(SIZE, RUNS);
-//        array2 = array1.clone();
-//        array3 = array1.clone();
-//        array4 = array1.clone();
-//        array5 = array1.clone();
-//        array6 = array1.clone();
-//        array7 = array1.clone();
-//        array10 = array1.clone();
-//
-//        System.gc();
-//
-//        title2("Presorted array of " + SIZE + " elements with " + RUNS
-//                + " runs");
-//
-//        //// Comb sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CombSort<Integer>().sort(array1);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Comb sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array1));
-//
-//        //// Counting sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new CountingSort<Integer>().sort(array2);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Counting sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array2));
-//
-//        //// Tree sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new TreeSort<Integer>().sort(array3);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Tree sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array3));
-//
-//        //// Natural mergesort ////
-//
-//        ta = System.currentTimeMillis();
-//        new NaturalMergeSort<Integer>().sort(array4);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Natural merge sort in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array4));
-//
-//        //// Batcher's method ////
-//
-//        ta = System.currentTimeMillis();
-//        new BatchersSort<Integer>().sort(array5);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Batcher's method in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array5));
-//
-//        //// Iterative merge sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new IterativeMergeSort<Integer>().sort(array6);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Iterative merge sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array6));
-//
-//        //// Heap-selection sort ////
-//
-//        ta = System.currentTimeMillis();
-//        new HeapSelectionSort<Integer>().sort(array7);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Heap-selection sort in " + (tb - ta)
-//                + " ms. Sorted: "
-//                + isSorted(array7));
-//
-//        //// Arrays.sort ////
-//
-//        ta = System.currentTimeMillis();
-//        Arrays.sort(array10);
-//        tb = System.currentTimeMillis();
-//
-//        System.out.println("Arrays.sort() in " + (tb - ta) + " ms. Sorted: "
-//                + isSorted(array10));
-//
-//        line();
-//
-//        System.out.println("All arrays are equal: "
-//                + allWeakEquals(array1,
-//                                array2,
-//                                array3,
-//                                array4,
-//                                array5,
-//                                array6,
-//                                array7,
-//                                array10));
-//    }
+    private static void profileBinaryHeap() {
+        BinaryHeap<Integer> heap = new BinaryHeap<Integer>();
+
+        for (int i = 10; i > 0; --i) {
+            heap.insert(i, i);
+        }
+
+        while(heap.isEmpty() == false) {
+            System.out.print(heap.extractMinimum() + " ");
+        }
+
+        System.out.println();
+
+        heap.clear();
+        line();
+
+        for (int i = 10; i > 0; --i) {
+            heap.insert(i, i);
+        }
+
+        heap.decreasePriority(10, 0);
+
+        while(heap.isEmpty() == false) {
+            System.out.print(heap.extractMinimum() + " ");
+        }
+
+        System.out.println();
+    }
+
+    private static void profileShortestPathAlgorithms() {
+        final int N = 2000;
+        final float LOAD_FACTOR = 10.0f / N;
+
+        title("General shortest path algorithms with " + N + " nodes");
+
+        Random r = new Random();
+        Triple<List<DirectedGraphNode>,
+               DoubleWeightFunction,
+               CoordinateMap> triple = getRandomGraph(N, LOAD_FACTOR, r, new EuclidianMetric(null, null));
+
+        DirectedGraphNode source = triple.first.get(r.nextInt(N));
+        DirectedGraphNode target = triple.first.get(r.nextInt(N));
+
+        System.out.println("Source: " + source.toString());
+        System.out.println("Target: " + target.toString());
+
+        PriorityQueue<DirectedGraphNode> OPEN =
+                new BinaryHeap<DirectedGraphNode>(N);
+
+        GeneralPathFinder finder1 = new DijkstraFinder(OPEN);
+
+        long ta = System.currentTimeMillis();
+
+        List<DirectedGraphNode> path1 =
+                finder1.find(source, target, triple.second);
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("DijkstraFinder in " + (tb - ta) + " ms, "
+                + "path connected: " + isConnectedPath(path1)
+                + ", cost: " + getPathCost(path1, triple.second));
+
+        OPEN = new BinaryHeap<DirectedGraphNode>(N);
+
+        GeneralPathFinder finder2 =
+                new AStarFinder(OPEN,
+                                new EuclidianMetric(
+                                    triple.third,
+                                    target));
+
+        ta = System.currentTimeMillis();
+
+        List<DirectedGraphNode> path2 =
+                finder2.find(source, target, triple.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("AStarFinder in " + (tb - ta) + " ms, "
+                + "path connected: " + isConnectedPath(path2)
+                + ", cost: " + getPathCost(path2, triple.second));
+
+        OPEN = new BinaryHeap<DirectedGraphNode>(N);
+
+        GeneralPathFinder finder3 =
+                new BidirectionalDijkstraFinder(OPEN);
+
+        ta = System.currentTimeMillis();
+
+        List<DirectedGraphNode> path3 =
+                finder3.find(source, target, triple.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("BidirectionalDijkstraFinder in " + (tb - ta)
+                + " ms, " + "path connected: " + isConnectedPath(path3)
+                + ", cost: " + getPathCost(path3, triple.second));
+
+        System.out.println("Path are same: " + pathsAreSame(path1, path2, path3));
+    }
 }

@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import net.coderodde.cskit.graph.DirectedGraphNode;
+import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
+import net.coderodde.cskit.graph.p2psp.general.HeuristicFunction;
 import net.coderodde.cskit.sorting.Range;
 
 /**
@@ -16,6 +19,36 @@ import net.coderodde.cskit.sorting.Range;
  * @version 1.6 (7.12.2013)
  */
 public class Utilities {
+
+    public static class Pair<F, S> {
+        public F first;
+        public S second;
+
+        public Pair(F first, S second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public Pair() {
+
+        }
+    }
+
+    public static class Triple<F, S, T> {
+        public F first;
+        public S second;
+        public T third;
+
+        public Triple(F first, S second, T third) {
+            this.first = first;
+            this.second = second;
+            this.third = third;
+        }
+
+        public Triple() {
+
+        }
+    }
 
     public static <T> T checkNotNull(T field, String errmsg) {
         if (field == null) {
@@ -33,6 +66,17 @@ public class Utilities {
         }
     }
 
+    public static double getPathCost(List<DirectedGraphNode> path,
+                                     DoubleWeightFunction w) {
+        double cost = 0;
+
+        for (int i = 0; i < path.size() - 1; ++i) {
+            cost += w.get(path.get(i), path.get(i + 1));
+        }
+
+        return cost;
+    }
+
     public static List<DirectedGraphNode> tracebackPath(DirectedGraphNode target,
             Map<DirectedGraphNode, DirectedGraphNode> parentMap) {
         ArrayList<DirectedGraphNode> path = new ArrayList<DirectedGraphNode>();
@@ -41,6 +85,31 @@ public class Utilities {
             target = parentMap.get(target);
         }
         java.util.Collections.reverse(path);
+        return path;
+    }
+
+    public static List<DirectedGraphNode> tracebackPathBidirectional(
+            DirectedGraphNode source,
+            DirectedGraphNode touch,
+            DirectedGraphNode target,
+            Map<DirectedGraphNode, DirectedGraphNode> PARENTA,
+            Map<DirectedGraphNode, DirectedGraphNode> PARENTB) {
+        ArrayList<DirectedGraphNode> path = new ArrayList<DirectedGraphNode>();
+        DirectedGraphNode current = touch;
+
+        while (current != null) {
+            path.add(current);
+            current = PARENTA.get(current);
+        }
+
+        java.util.Collections.reverse(path);
+        current = PARENTB.get(touch);
+
+        while (current != null) {
+            path.add(current);
+            current = PARENTB.get(current);
+        }
+
         return path;
     }
 
@@ -197,6 +266,74 @@ public class Utilities {
         graph.get(graph.size() - 1).addChild(graph.get(0));
 
         return graph;
+    }
+
+    /**
+     * Creates the structures defining a laid-out graph.
+     *
+     * @param size the number of nodes.
+     * @param elf edge load factor.
+     * @param r the random number generator.
+     * @return the graph structures.
+     */
+    public static final Triple<List<DirectedGraphNode>,
+                               DoubleWeightFunction,
+                               CoordinateMap> getRandomGraph(
+                                    int size,
+                                    float elf,
+                                    Random r,
+                                    HeuristicFunction f) {
+        ArrayList<DirectedGraphNode> graph =
+                new ArrayList<DirectedGraphNode>(size);
+        DoubleWeightFunction w = new DoubleWeightFunction();
+        CoordinateMap m = new CoordinateMap(4, size);
+
+        for (int i = 0; i < size; ++i) {
+            DirectedGraphNode u = new DirectedGraphNode("" + i);
+            graph.add(u);
+            m.put(u, getRandomCoordinates(4, r, 1000));
+        }
+
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                if (elf < r.nextFloat()) {
+                    graph.get(i).addChild(graph.get(j));
+                    w.put(graph.get(i),
+                          graph.get(j),
+                          1.5 * f.get(m.get(graph.get(i)),
+                                      m.get(graph.get(j))));
+                }
+            }
+        }
+
+        for (int i = 0; i < size - 1; ++i) {
+            graph.get(i).addChild(graph.get(i + 1));
+            w.put(graph.get(i),
+                  graph.get(i + 1),
+                  1.5 * f.get(m.get(graph.get(i)),
+                              m.get(graph.get(i + 1))));
+        }
+
+        graph.get(size - 1).addChild(graph.get(0));
+        w.put(graph.get(size - 1),
+              graph.get(0),
+              1.5 * f.get(m.get(graph.get(size - 1)),
+                          m.get(graph.get(0))));
+
+        return new Triple<List<DirectedGraphNode>,
+                          DoubleWeightFunction,
+                          CoordinateMap>(graph, w, m);
+
+    }
+
+    public static double[] getRandomCoordinates(int n, Random r, double max) {
+        double[] vec = new double[n];
+
+        for (int i = 0; i < n; ++i) {
+            vec[i] = max * r.nextDouble();
+        }
+
+        return vec;
     }
 
     public static final <E extends Comparable<? super E>>

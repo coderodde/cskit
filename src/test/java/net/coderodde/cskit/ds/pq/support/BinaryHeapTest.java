@@ -1,5 +1,6 @@
 package net.coderodde.cskit.ds.pq.support;
 
+import net.coderodde.cskit.ds.pq.BinaryHeap;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import org.junit.Test;
@@ -45,6 +46,16 @@ public class BinaryHeapTest {
 
     @Test
     public void testDecreasePriority() {
+        pq.clear();
+
+        for (int i = 0; i < 7; ++i) {
+                pq.insert(i, i);
+        }
+
+        pq.decreasePriority(6, -1);
+
+        assertEquals(6, pq.min(), 0.01);
+        assertEquals(6, pq.extractMinimum(), 0.01);
     }
 
     @Test

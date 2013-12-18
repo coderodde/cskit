@@ -55,4 +55,18 @@ public interface PriorityQueue<E> {
      * Clears this priority queue.
      */
     public void clear();
+
+    /**
+     * Queries whether <code>element</code> is already in this queue.
+     *
+     * @param element the element to query.
+     * @return <code>true</code> if the element is in this queue,
+     * <code>false</code> otherwise.
+     */
+    public boolean contains(E element);
+
+    /**
+     * Spawns another empty queue.
+     */
+    public PriorityQueue<E> newInstance();
 }

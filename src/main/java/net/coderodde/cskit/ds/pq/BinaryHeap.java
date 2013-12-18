@@ -1,4 +1,4 @@
-package net.coderodde.cskit.ds.pq.support;
+package net.coderodde.cskit.ds.pq;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +24,11 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
     @Override
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    @Override
+    public PriorityQueue<E> newInstance() {
+        return new BinaryHeap<E>(nodeArray.length);
     }
 
     private static class HeapNode<E> {
@@ -124,6 +129,7 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
             } else {
                 nodeArray[index] = node;
                 node.index = index;
+                return;
             }
         }
     }
@@ -187,6 +193,11 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
     @Override
     public void clear() {
         size = 0;
+    }
+
+    @Override
+    public boolean contains(E element) {
+        return map.containsKey(element);
     }
 
     private int checkCapacity(int capacity) {

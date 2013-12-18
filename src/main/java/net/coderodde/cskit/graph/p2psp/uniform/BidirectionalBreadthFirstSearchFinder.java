@@ -18,7 +18,8 @@ import net.coderodde.cskit.graph.DirectedGraphNode;
  * @author Rodion Efremov
  * @version 1.6
  */
-public class BidirectionalBreadthFirstSearchFinder implements UniformCostPathFinder {
+public class BidirectionalBreadthFirstSearchFinder
+implements UniformCostPathFinder {
 
     // We choose to reuse the data structures. This resembles losing virginity:
     // it all expands and becomes loose enough. :)
