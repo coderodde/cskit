@@ -3,19 +3,6 @@ package net.coderodde.cskit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import static net.coderodde.cskit.Utilities.Triple;
-import static net.coderodde.cskit.Utilities.allWeakEquals;
-import static net.coderodde.cskit.Utilities.generateSimpleGraph;
-import static net.coderodde.cskit.Utilities.getPathCost;
-import static net.coderodde.cskit.Utilities.getPresortedArray;
-import static net.coderodde.cskit.Utilities.getRandomGraph;
-import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
-import static net.coderodde.cskit.Utilities.isConnectedPath;
-import static net.coderodde.cskit.Utilities.isSorted;
-import static net.coderodde.cskit.Utilities.line;
-import static net.coderodde.cskit.Utilities.pathsAreSame;
-import static net.coderodde.cskit.Utilities.title;
-import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
@@ -38,6 +25,20 @@ import net.coderodde.cskit.sorting.IterativeMergeSort;
 import net.coderodde.cskit.sorting.NaturalMergeSort;
 import net.coderodde.cskit.sorting.ObjectSortingAlgorithm;
 import net.coderodde.cskit.sorting.TreeSort;
+import static net.coderodde.cskit.Utilities.Triple;
+import static net.coderodde.cskit.Utilities.allWeakEquals;
+import static net.coderodde.cskit.Utilities.debugPrintArray;
+import static net.coderodde.cskit.Utilities.generateSimpleGraph;
+import static net.coderodde.cskit.Utilities.getPathCost;
+import static net.coderodde.cskit.Utilities.getPresortedArray;
+import static net.coderodde.cskit.Utilities.getRandomGraph;
+import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
+import static net.coderodde.cskit.Utilities.isConnectedPath;
+import static net.coderodde.cskit.Utilities.isSorted;
+import static net.coderodde.cskit.Utilities.line;
+import static net.coderodde.cskit.Utilities.pathsAreSame;
+import static net.coderodde.cskit.Utilities.title;
+import static net.coderodde.cskit.Utilities.title2;
 
 /**
  * Hello from cskit.
@@ -53,7 +54,6 @@ public class Demo{
                                        new IterativeMergeSort<Integer>(),
                                        new NaturalMergeSort<Integer>(),
                                        new TreeSort<Integer>());
-//        profileBinaryHeap();
         profileShortestPathAlgorithms();
         profileBreadthFirstSearchAlgorithms();
     }
@@ -341,5 +341,14 @@ public class Demo{
                 + ", cost: " + getPathCost(path3, triple.second));
 
         System.out.println("Path are same: " + pathsAreSame(path1, path2, path3));
+    }
+
+    private static void debugHeapSelectionSort() {
+        Random r = new Random();
+        Integer[] array = getRandomIntegerArray(10, 0, 10, r);
+
+        debugPrintArray(array);
+        new HeapSelectionSort<Integer>().sort(array);
+        debugPrintArray(array);
     }
 }

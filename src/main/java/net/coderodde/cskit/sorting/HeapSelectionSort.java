@@ -35,10 +35,12 @@ implements ObjectSortingAlgorithm<E> {
         int index = 0;
         final int N = to - from + 1;
 
-        while (index < N) {
+        while (index < N - 1) {
             array[index++] = heap.min();
             heap.inc();
         }
+
+        array[index] = heap.min();
     }
 
     private void descendingSort(E[] array, int from, int to) {
@@ -49,7 +51,7 @@ implements ObjectSortingAlgorithm<E> {
 
         int index = 0;
         final int N = to - from + 1;
-        
+
         while (index < N) {
             array[index++] = heap.min();
             heap.inc();
