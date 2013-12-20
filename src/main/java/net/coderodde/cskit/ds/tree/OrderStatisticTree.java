@@ -1,5 +1,9 @@
 package net.coderodde.cskit.ds.tree;
 
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * This class implements an order-statistic tree. Essentially, this is counted
  * AVL-tree.
@@ -7,7 +11,8 @@ package net.coderodde.cskit.ds.tree;
  * @author rodionefremov
  * @version 1.6180 (19.12.2013)
  */
-public class OrderStatisticTree<K extends Comparable<? super K>, V> {
+public class OrderStatisticTree<K extends Comparable<? super K>, V>
+        implements Iterable<K> {
 
     /**
      * An entry (a node) in this tree.
@@ -21,32 +26,26 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
          * The key of this entry.
          */
         private K key;
-
         /**
          * The value of this entry.
          */
         private V value;
-
         /**
          * Amount of all key-value -mappings in the left subtree of this entry.
          */
         private int count;
-
         /**
          * This field is the height of this entry. Grows upwards.
          */
         private int h;
-
         /**
          * The parent entry of this entry.
          */
         private Entry<K, V> parent;
-
         /**
          * The left entry (subtree).
          */
         private Entry<K, V> left;
-
         /**
          * The right entry.
          */
@@ -84,9 +83,54 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
 
             return e;
         }
+
+        /**
+         * Returns the successor entry if one exists, and
+         * <code>null</code> if there is no such.
+         *
+         * @return the successor entry or <code>null</code>.
+         */
+        public Entry<K, V> next() {
+            Entry<K, V> e = this;
+
+            if (e.right != null) {
+                e = e.right;
+
+                while (e.left != null) {
+                    e = e.left;
+                }
+
+                return e;
+            }
+
+            while (e.parent != null && e.parent.right == e) {
+                e = e.parent;
+            }
+
+            if (e.parent == null) {
+                return null;
+            }
+
+            return e.parent;
+        }
     }
+
     private Entry<K, V> root;
     private int size;
+    private long modCount;
+
+    /**
+     * Clears this tree.
+     */
+    public void clear() {
+        modCount++;
+        root = null;
+        size = 0;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
     /**
      * Retrieves the size of this tree.
@@ -95,6 +139,23 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
      */
     public int size() {
         return size;
+    }
+
+    public boolean containsKey(K key) {
+        Entry<K, V> e = root;
+        int cmp;
+
+        while (e != null) {
+            if ((cmp = key.compareTo(e.key)) < 0) {
+                e = e.left;
+            } else if (cmp > 0) {
+                e = e.right;
+            } else {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -185,6 +246,8 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
         if (key == null) {
             throw new NullPointerException("'key' is null.");
         }
+
+        modCount++;
 
         Entry<K, V> e = new Entry<K, V>(key, value);
 
@@ -291,10 +354,16 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
      * logarithmic time.
      *
      * @param key the key of a node.
+     *
      * @return the value associated with <tt>key</tt> or null, if there was no
      * entries in the tree with key <tt>key</tt>.
      */
     public V remove(K key) {
+        if (size == 0) {
+            throw new NoSuchElementException("Removing from an empty tree.");
+        }
+
+        modCount++;
         Entry<K, V> e = root;
         int cmp;
 
@@ -304,50 +373,9 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
             } else if (cmp < 0) {
                 e = e.right;
             } else {
-                size--;
                 V old = e.value;
                 e = removeImpl(e);
-
-                Entry<K, V> p = e.parent;
-
-                while (p != null) {
-
-                    Entry<K, V> subroot;
-                    Entry<K, V> pp = p.parent;
-                    boolean left = (pp == null || pp.left == p);
-
-                    if (h(p.left) == h(p.right) + 2) {
-                        if (h(p.left.left) < h(p.left.right)) {
-                            subroot = leftRightRotate(p);
-                        } else {
-                            subroot = rightRotate(p);
-                        }
-                    } else if (h(p.left) + 2 == h(p.right)) {
-                        if (h(p.right.right) < h(p.right.left)) {
-                            subroot = rightLeftRotate(p); //?
-                        } else {
-                            subroot = leftRotate(p);
-                        }
-                    } else {
-                        p.h = Math.max(h(p.left), h(p.right)) + 1;
-                        p = p.parent;
-                        continue;
-                    }
-
-                    if (p == root) {
-                        root = subroot;
-                        return old;
-                    }
-
-                    if (left) {
-                        pp.left = subroot;
-                    } else {
-                        pp.right = subroot;
-                    }
-
-                    p = pp;
-                }
-
+                balanceAfterRemoval(e);
                 return old;
             }
         }
@@ -355,13 +383,103 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
         return null;
     }
 
-    /**
-     * Returns the height of an argument node or -1, if <tt>e</tt> is null.
-     *
-     * @param e the node to measure.
-     * @return the height of <tt>e</tt> or -1, if <tt>e</tt> is null.
-     */
-    private int h(Entry<K, V> e) {
+    @Override
+    public Iterator<K> iterator() {
+        return new KeyIterator();
+    }
+
+    private void balanceAfterRemoval(Entry<K, V> e) {
+        Entry<K, V> p = e.parent;
+
+        while (p != null) {
+
+            Entry<K, V> subroot;
+            Entry<K, V> pp = p.parent;
+            boolean left = (pp == null || pp.left == p);
+
+            if (h(p.left) == h(p.right) + 2) {
+                if (h(p.left.left) < h(p.left.right)) {
+                    subroot = leftRightRotate(p);
+                } else {
+                    subroot = rightRotate(p);
+                }
+            } else if (h(p.left) + 2 == h(p.right)) {
+                if (h(p.right.right) < h(p.right.left)) {
+                    subroot = rightLeftRotate(p); //?
+                } else {
+                    subroot = leftRotate(p);
+                }
+            } else {
+                p.h = Math.max(h(p.left), h(p.right)) + 1;
+                p = p.parent;
+                continue;
+            }
+
+            if (p == root) {
+                root = subroot;
+                return;
+            }
+
+            if (left) {
+                pp.left = subroot;
+            } else {
+                pp.right = subroot;
+            }
+
+            p = pp;
+        }
+    }
+
+
+private class KeyIterator implements Iterator<K> {
+
+    private long expectedModCount = OrderStatisticTree.this.modCount;
+    private Entry<K, V> entry = OrderStatisticTree.this.root.min();
+    private Entry<K, V> lastReturned = null;
+    private int iterated = 0;
+
+    @Override
+    public boolean hasNext() {
+        checkModCount();
+        return entry != null;
+    }
+
+    @Override
+    public K next() {
+        checkModCount();
+        lastReturned = entry;
+        entry = entry.next();
+        return lastReturned.getKey();
+    }
+
+    @Override
+    public void remove() {
+        checkModCount();
+
+        if (lastReturned == null) {
+            throw new NoSuchElementException(
+                    "Trying to remove an element twice.");
+        }
+        
+        lastReturned = removeImpl(lastReturned);
+        balanceAfterRemoval(lastReturned);
+        lastReturned = null;
+    }
+
+    private void checkModCount() {
+        if (expectedModCount != OrderStatisticTree.this.modCount) {
+            throw new ConcurrentModificationException(
+                    "Concurrent modification detected.");
+        }
+    }
+}
+/**
+ * Returns the height of an argument node or -1, if <tt>e</tt> is null.
+ *
+ * @param e the node to measure.
+ * @return the height of <tt>e</tt> or -1, if <tt>e</tt> is null.
+ */
+private int h(Entry<K, V> e) {
         return e != null ? e.h : -1;
     }
 
@@ -444,6 +562,8 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V> {
      * @return the actual node removed.
      */
     private Entry<K, V> removeImpl(Entry<K, V> e) {
+        --size;
+
         if (e.left == null && e.right == null) {
             // The case where the removed node has no children.
             Entry<K, V> p = e.parent;

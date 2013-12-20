@@ -1,5 +1,6 @@
 package net.coderodde.cskit.ds.tree;
 
+import java.util.Iterator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -37,26 +38,39 @@ public class OrderStatisticTreeTest {
     }
 
     @Test
-    public void testSize() {
-    }
+    public void test2() {
+        tree.clear();
 
-    @Test
-    public void testGet() {
-    }
+        assertTrue(tree.isEmpty());
+        assertEquals(0, tree.size());
 
-    @Test
-    public void testEntryAt() {
-    }
+        for (int i = 0; i < 20; i++) {
+            tree.put(i, i);
+        }
 
-    @Test
-    public void testGetRankOf() {
-    }
+        int i = 0;
+        Integer j;
+        Iterator<Integer> iterator = tree.iterator();
 
-    @Test
-    public void testPut() {
-    }
+        while (iterator.hasNext()) {
+            j = iterator.next();
 
-    @Test
-    public void testRemove() {
+            if (j == 9 || j == 19) {
+                iterator.remove();
+            }
+
+            i++;
+        }
+
+        assertEquals(18, tree.size());
+        assertFalse(tree.isEmpty());
+
+        for (i = 0; i < 20; ++i) {
+            if (i == 9 || i == 19) {
+                assertFalse(tree.containsKey(i));
+            } else {
+                assertTrue(tree.containsKey(i));
+            }
+        }
     }
 }
