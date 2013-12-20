@@ -114,7 +114,6 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
             return e.parent;
         }
     }
-
     private Entry<K, V> root;
     private int size;
     private long modCount;
@@ -388,6 +387,132 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
         return new KeyIterator();
     }
 
+    /**
+     * Checks all of the AVL-tree invariants.
+     *
+     * @return <tt>true</tt> if this is a valid AVL-tree, <tt>false</tt>
+     * otherwise.
+     */
+    public boolean isHealthy() {
+        return !hasCycles()
+                && heightFieldsOK()
+                && isBalanced()
+                && isWellIndexed();
+    }
+
+    public boolean hasCycles() {
+        return hasCycles(root, new java.util.HashSet<Entry<K, V>>());
+    }
+
+    public boolean heightFieldsOK() {
+        return checkHeight(root) == root.h;
+    }
+
+    public boolean isBalanced() {
+        return isBalanced(root);
+    }
+
+    public boolean isWellIndexed() {
+        if (size == 0) {
+            return true;
+        }
+
+        boolean leftOk = root.count == countLeft(root.left);
+        boolean rightOk = (root.right != null)
+                         ? root.right.count == countLeft(root.right.left) :
+                         true;
+
+        return leftOk && rightOk;
+    }
+
+    private int checkHeight(Entry<K, V> e) {
+        if (e == null) {
+            return -1;
+        }
+
+        int l = checkHeight(e.left);
+
+        if (l == Integer.MIN_VALUE) {
+            return l;
+        }
+
+        int r = checkHeight(e.right);
+
+        if (r == Integer.MIN_VALUE) {
+            return r;
+        }
+
+        int h = Math.max(l, r) + 1;
+
+        if (h != e.h) {
+            return Integer.MIN_VALUE;
+        } else {
+            return h;
+        }
+    }
+
+    private boolean isBalanced(Entry<K, V> e) {
+        if (e == null) {
+            return true;
+        }
+
+        if (Math.abs(h(e.left) - h(e.right)) > 1) {
+            return false;
+        }
+
+        if (isBalanced(e.left) == false) {
+            return false;
+        }
+
+        if (isBalanced(e.right) == false) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private int countLeft(Entry<K, V> e) {
+        if (e == null) {
+            return 0;
+        }
+
+        int l;
+        int r;
+
+        if ((l = countLeft(e.left)) != e.count) {
+            return Integer.MIN_VALUE;
+        }
+
+        if ((r = countLeft(e.right)) == Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+
+        return l + r + 1;
+    }
+
+    private boolean hasCycles(Entry<K, V> e, java.util.HashSet<Entry<K, V>> set) {
+        if (e == null) {
+            return false;
+        }
+
+        if (set.contains(e)) {
+            return true;
+        }
+
+        set.add(e);
+
+        if (hasCycles(e.left, set)) {
+            return true;
+        }
+
+        if (hasCycles(e.right, set)) {
+            return true;
+        }
+
+        set.remove(e);
+        return false;
+    }
+
     private void balanceAfterRemoval(Entry<K, V> e) {
         Entry<K, V> p = e.parent;
 
@@ -430,56 +555,56 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
         }
     }
 
+    private class KeyIterator implements Iterator<K> {
 
-private class KeyIterator implements Iterator<K> {
+        private long expectedModCount = OrderStatisticTree.this.modCount;
+        private Entry<K, V> entry = OrderStatisticTree.this.root.min();
+        private Entry<K, V> lastReturned = null;
+        private int iterated = 0;
 
-    private long expectedModCount = OrderStatisticTree.this.modCount;
-    private Entry<K, V> entry = OrderStatisticTree.this.root.min();
-    private Entry<K, V> lastReturned = null;
-    private int iterated = 0;
-
-    @Override
-    public boolean hasNext() {
-        checkModCount();
-        return entry != null;
-    }
-
-    @Override
-    public K next() {
-        checkModCount();
-        lastReturned = entry;
-        entry = entry.next();
-        return lastReturned.getKey();
-    }
-
-    @Override
-    public void remove() {
-        checkModCount();
-
-        if (lastReturned == null) {
-            throw new NoSuchElementException(
-                    "Trying to remove an element twice.");
+        @Override
+        public boolean hasNext() {
+            checkModCount();
+            return entry != null;
         }
-        
-        lastReturned = removeImpl(lastReturned);
-        balanceAfterRemoval(lastReturned);
-        lastReturned = null;
-    }
 
-    private void checkModCount() {
-        if (expectedModCount != OrderStatisticTree.this.modCount) {
-            throw new ConcurrentModificationException(
-                    "Concurrent modification detected.");
+        @Override
+        public K next() {
+            checkModCount();
+            lastReturned = entry;
+            entry = entry.next();
+            return lastReturned.getKey();
+        }
+
+        @Override
+        public void remove() {
+            checkModCount();
+
+            if (lastReturned == null) {
+                throw new NoSuchElementException(
+                        "Trying to remove an element twice.");
+            }
+
+            lastReturned = removeImpl(lastReturned);
+            balanceAfterRemoval(lastReturned);
+            lastReturned = null;
+        }
+
+        private void checkModCount() {
+            if (expectedModCount != OrderStatisticTree.this.modCount) {
+                throw new ConcurrentModificationException(
+                        "Concurrent modification detected.");
+            }
         }
     }
-}
-/**
- * Returns the height of an argument node or -1, if <tt>e</tt> is null.
- *
- * @param e the node to measure.
- * @return the height of <tt>e</tt> or -1, if <tt>e</tt> is null.
- */
-private int h(Entry<K, V> e) {
+
+    /**
+     * Returns the height of an argument node or -1, if <tt>e</tt> is null.
+     *
+     * @param e the node to measure.
+     * @return the height of <tt>e</tt> or -1, if <tt>e</tt> is null.
+     */
+    private int h(Entry<K, V> e) {
         return e != null ? e.h : -1;
     }
 

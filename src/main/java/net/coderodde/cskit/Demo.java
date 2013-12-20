@@ -376,5 +376,6 @@ public class Demo{
         }
 
         System.out.println("size: " + tree.size());
+        System.out.println("Healthy: " + tree.isHealthy());
     }
 }

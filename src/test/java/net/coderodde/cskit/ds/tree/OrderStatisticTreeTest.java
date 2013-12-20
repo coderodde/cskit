@@ -72,5 +72,7 @@ public class OrderStatisticTreeTest {
                 assertTrue(tree.containsKey(i));
             }
         }
+
+        assertTrue(tree.isHealthy());
     }
 }
