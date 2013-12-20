@@ -26,26 +26,32 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
          * The key of this entry.
          */
         private K key;
+
         /**
          * The value of this entry.
          */
         private V value;
+
         /**
          * Amount of all key-value -mappings in the left subtree of this entry.
          */
         private int count;
+
         /**
          * This field is the height of this entry. Grows upwards.
          */
         private int h;
+
         /**
          * The parent entry of this entry.
          */
         private Entry<K, V> parent;
+
         /**
          * The left entry (subtree).
          */
         private Entry<K, V> left;
+
         /**
          * The right entry.
          */
@@ -74,7 +80,12 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
             return value;
         }
 
-        public Entry<K, V> min() {
+        /**
+         * Returns the minimum entry of this (sub-)tree.
+         *
+         * @return the minimum entry of this entry.
+         */
+        private Entry<K, V> min() {
             Entry<K, V> e = this;
 
             while (e.left != null) {
@@ -90,7 +101,7 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
          *
          * @return the successor entry or <code>null</code>.
          */
-        public Entry<K, V> next() {
+        private Entry<K, V> next() {
             Entry<K, V> e = this;
 
             if (e.right != null) {
@@ -114,6 +125,7 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
             return e.parent;
         }
     }
+
     private Entry<K, V> root;
     private int size;
     private long modCount;
@@ -127,6 +139,13 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
         size = 0;
     }
 
+    /**
+     * Returns <code>true</code> if this tree is empty; <code>false</code>
+     * otherwise.
+     *
+     * @return <code>true</code> if this tree is empty; <code>false</code>
+     * otherwise.
+     */
     public boolean isEmpty() {
         return size == 0;
     }
@@ -140,6 +159,15 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
         return size;
     }
 
+    /**
+     * Returns <code>true</code> if this tree contains the specified key,
+     * <code>false</code> otherwise.
+     *
+     * @param key the key to query.
+     *
+     * @return <code>true</code> if this tree contains the key,
+     * <code>false</code>.
+     */
     public boolean containsKey(K key) {
         Entry<K, V> e = root;
         int cmp;
@@ -400,19 +428,19 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
                 && isWellIndexed();
     }
 
-    public boolean hasCycles() {
+    private boolean hasCycles() {
         return hasCycles(root, new java.util.HashSet<Entry<K, V>>());
     }
 
-    public boolean heightFieldsOK() {
+    private boolean heightFieldsOK() {
         return checkHeight(root) == root.h;
     }
 
-    public boolean isBalanced() {
+    private boolean isBalanced() {
         return isBalanced(root);
     }
 
-    public boolean isWellIndexed() {
+    private boolean isWellIndexed() {
         if (size == 0) {
             return true;
         }
@@ -560,7 +588,6 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
         private long expectedModCount = OrderStatisticTree.this.modCount;
         private Entry<K, V> entry = OrderStatisticTree.this.root.min();
         private Entry<K, V> lastReturned = null;
-        private int iterated = 0;
 
         @Override
         public boolean hasNext() {
@@ -718,6 +745,7 @@ public class OrderStatisticTree<K extends Comparable<? super K>, V>
 
             return e;
         }
+        
         if (e.left == null || e.right == null) {
             // Case: only one child.
             Entry<K, V> child = e.left != null ? e.left : e.right;
