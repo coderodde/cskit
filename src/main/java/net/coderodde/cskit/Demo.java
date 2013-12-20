@@ -39,6 +39,7 @@ import static net.coderodde.cskit.Utilities.line;
 import static net.coderodde.cskit.Utilities.pathsAreSame;
 import static net.coderodde.cskit.Utilities.title;
 import static net.coderodde.cskit.Utilities.title2;
+import net.coderodde.cskit.ds.tree.OrderStatisticTree;
 
 /**
  * Hello from cskit.
@@ -47,15 +48,16 @@ import static net.coderodde.cskit.Utilities.title2;
 public class Demo{
 
     public static void main(String... args) {
-        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
-                                       new CombSort<Integer>(),
-                                       new CountingSort<Integer>(),
-                                       new HeapSelectionSort<Integer>(),
-                                       new IterativeMergeSort<Integer>(),
-                                       new NaturalMergeSort<Integer>(),
-                                       new TreeSort<Integer>());
-        profileShortestPathAlgorithms();
-        profileBreadthFirstSearchAlgorithms();
+//        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
+//                                       new CombSort<Integer>(),
+//                                       new CountingSort<Integer>(),
+//                                       new HeapSelectionSort<Integer>(),
+//                                       new IterativeMergeSort<Integer>(),
+//                                       new NaturalMergeSort<Integer>(),
+//                                       new TreeSort<Integer>());
+//        profileShortestPathAlgorithms();
+//        profileBreadthFirstSearchAlgorithms();
+        debugOST();
     }
 
     public static void profileBreadthFirstSearchAlgorithms() {
@@ -350,5 +352,29 @@ public class Demo{
         debugPrintArray(array);
         new HeapSelectionSort<Integer>().sort(array);
         debugPrintArray(array);
+    }
+
+    private static void debugOST() {
+        OrderStatisticTree<Integer, Integer> tree =
+                new OrderStatisticTree<Integer, Integer>();
+
+        for (int i = 0; i < 100; ++i) {
+            tree.put(i, i);
+        }
+
+        System.out.println("Size: " + tree.size());
+
+        for (Integer i = 0; i < tree.size(); ++i) {
+            System.out.println("i.equals(tree.get(i)): " + i.equals(tree.get(i)));
+            System.out.println("i.equals(tree.entryAt(i).getKey()): " + i.equals(tree.entryAt(i).getKey()));
+            System.out.println("i.equals(tree.entryAt(i).getValue()): " + i.equals(tree.entryAt(i).getValue()));
+            System.out.println(i + ".equals(" + tree.getRankOf(i) + "): " + i.equals(tree.getRankOf(i)));
+        }
+
+        for (Integer i = 20; i < 100; ++i) {
+            tree.remove(i);
+        }
+
+        System.out.println("size: " + tree.size());
     }
 }
