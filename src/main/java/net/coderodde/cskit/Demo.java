@@ -2,7 +2,9 @@ package net.coderodde.cskit;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
@@ -57,7 +59,112 @@ public class Demo{
 //                                       new TreeSort<Integer>());
 //        profileShortestPathAlgorithms();
 //        profileBreadthFirstSearchAlgorithms();
-        debugOST();
+          profileOrderStatisticTree();
+//        debugOST();
+    }
+
+    public static void profileOrderStatisticTree() {
+        OrderStatisticTree<Integer, Integer> m1 = new OrderStatisticTree<Integer, Integer>();
+        Map<Integer, Integer> m2 = new TreeMap<Integer, Integer>();
+
+        long ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 100000; ++i) {
+            m1.put(i, i); 
+        }
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("OST.put() in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 100000; ++i) {
+            m2.put(i, i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("TreeMap.put() in " + (tb - ta) + " ms.");
+    
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 102000; ++i) {
+            m1.get(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("OST.get() in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 102000; ++i) {
+            m2.get(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("TreeMap.get() in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 102000; ++i) {
+            m1.remove(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("OST.remove() in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 102000; ++i) {
+            m2.remove(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("TreeMap.remove() in " + (tb - ta) + " ms.");
+
+        for (int i = 0; i < 100000; ++i) {
+            m1.put(i, i);
+            m2.put(i, i);
+        }
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 20000; ++i) {
+            m1.entryAt(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("OST.entryAt() in " + (tb - ta) + " ms.");
+ 
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 20000; ++i) {
+            getFromTreeMapHack(i, m2);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("TreeMap dirty select() hack in " + (tb - ta) + " ms.");
+    }
+
+    private static <K, V> K getFromTreeMapHack(int key, Map<K, V> map) {
+        int pos = 0;
+
+        for (K k : map.keySet()) {
+            if (key == pos) {
+                return k;
+            }
+
+            pos++;
+        }
+
+        return null;
     }
 
     public static void profileBreadthFirstSearchAlgorithms() {

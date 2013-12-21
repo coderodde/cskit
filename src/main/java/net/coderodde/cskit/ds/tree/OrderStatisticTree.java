@@ -11,7 +11,7 @@ import java.util.Set;
  * This class implements an order-statistic tree. Essentially, this is counted
  * AVL-tree.
  *
- * @author rodionefremov
+ * @author Rodion Efremov
  * @version 1.6180 (19.12.2013)
  */
 public class OrderStatisticTree<K extends Comparable<? super K>, V>
