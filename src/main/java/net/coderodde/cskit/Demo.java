@@ -368,7 +368,7 @@ public class Demo{
             System.out.println("i.equals(tree.get(i)): " + i.equals(tree.get(i)));
             System.out.println("i.equals(tree.entryAt(i).getKey()): " + i.equals(tree.entryAt(i).getKey()));
             System.out.println("i.equals(tree.entryAt(i).getValue()): " + i.equals(tree.entryAt(i).getValue()));
-            System.out.println(i + ".equals(" + tree.getRankOf(i) + "): " + i.equals(tree.getRankOf(i)));
+            System.out.println(i + ".equals(" + tree.rankOf(i) + "): " + i.equals(tree.rankOf(i)));
         }
 
         for (Integer i = 20; i < 100; ++i) {

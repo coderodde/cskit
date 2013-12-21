@@ -1,6 +1,7 @@
 package net.coderodde.cskit.ds.tree;
 
 import java.util.Iterator;
+import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -27,7 +28,7 @@ public class OrderStatisticTreeTest {
             assertEquals(i, tree.get(i));
             assertEquals(i, tree.entryAt(i).getKey());
             assertEquals(i, tree.entryAt(i).getValue());
-            assertEquals(i, new Integer(tree.getRankOf(new Integer(i))));
+            assertEquals(i, new Integer(tree.rankOf(new Integer(i))));
         }
 
         for (Integer i = 20; i < 100; ++i) {
@@ -74,5 +75,41 @@ public class OrderStatisticTreeTest {
         }
 
         assertTrue(tree.isHealthy());
+
+        for (i = 0; i < 20; ++i) {
+            tree.remove(i);
+        }
+
+        assertTrue(tree.isEmpty());
+        assertTrue(tree.isHealthy());
+        assertEquals(0, tree.size());
+
+        tree.put(1, 1);
+
+        assertFalse(tree.isEmpty());
+        assertTrue(tree.isHealthy());
+        assertEquals(1, tree.size());
+
+        Set<Integer> set = tree.keySet();
+
+        assertEquals(1, set.size());
+
+        set.remove(1);
+
+        assertTrue(set.isEmpty());
+
+        tree.put(1, 1);
+        tree.put(2, 2);
+        tree.put(3, 3);
+
+        assertEquals(3, tree.size());
+
+        set = tree.keySet();
+        Iterator<Integer> iter2 = set.iterator();
+
+        for (i = 1; i <= 3; ++i) {
+            Integer tmp = iter2.next();
+            assertEquals(new Integer(i), tmp);
+        }
     }
 }
