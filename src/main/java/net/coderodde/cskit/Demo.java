@@ -44,33 +44,33 @@ import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.tree.OrderStatisticTree;
 
 /**
- * Hello from cskit.
- *
+ * Hello from cskit. This is a performance demo.
  */
 public class Demo{
 
     public static void main(String... args) {
-//        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
-//                                       new CombSort<Integer>(),
-//                                       new CountingSort<Integer>(),
-//                                       new HeapSelectionSort<Integer>(),
-//                                       new IterativeMergeSort<Integer>(),
-//                                       new NaturalMergeSort<Integer>(),
-//                                       new TreeSort<Integer>());
-//        profileShortestPathAlgorithms();
-//        profileBreadthFirstSearchAlgorithms();
-          profileOrderStatisticTree();
-//        debugOST();
+        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
+                                       new CombSort<Integer>(),
+                                       new CountingSort<Integer>(),
+                                       new HeapSelectionSort<Integer>(),
+                                       new IterativeMergeSort<Integer>(),
+                                       new NaturalMergeSort<Integer>(),
+                                       new TreeSort<Integer>());
+        profileShortestPathAlgorithms();
+        profileBreadthFirstSearchAlgorithms();
+        profileOrderStatisticTree();
     }
 
     public static void profileOrderStatisticTree() {
-        OrderStatisticTree<Integer, Integer> m1 = new OrderStatisticTree<Integer, Integer>();
+        title("OrderStatisticTree demo");
+        OrderStatisticTree<Integer, Integer> m1 =
+                new OrderStatisticTree<Integer, Integer>();
         Map<Integer, Integer> m2 = new TreeMap<Integer, Integer>();
 
         long ta = System.currentTimeMillis();
 
         for (int i = 0; i < 100000; ++i) {
-            m1.put(i, i); 
+            m1.put(i, i);
         }
 
         long tb = System.currentTimeMillis();
@@ -86,7 +86,7 @@ public class Demo{
         tb = System.currentTimeMillis();
 
         System.out.println("TreeMap.put() in " + (tb - ta) + " ms.");
-    
+
         ta = System.currentTimeMillis();
 
         for (int i = 0; i < 102000; ++i) {
@@ -141,7 +141,7 @@ public class Demo{
         tb = System.currentTimeMillis();
 
         System.out.println("OST.entryAt() in " + (tb - ta) + " ms.");
- 
+
         ta = System.currentTimeMillis();
 
         for (int i = 0; i < 20000; ++i) {
@@ -150,7 +150,45 @@ public class Demo{
 
         tb = System.currentTimeMillis();
 
-        System.out.println("TreeMap dirty select() hack in " + (tb - ta) + " ms.");
+        System.out.println("TreeMap dirty select() hack in " + (tb - ta)
+                + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 20000; ++i) {
+            m1.rankOf(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("OST.rankOf() in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 20000; ++i) {
+            getRankOfTreeMapHack(i, m2);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("TreeMap dirty rankOf() hack in " + (tb - ta)
+                + " ms.");
+
+        line();
+    }
+
+    private static <K, V>   int getRankOfTreeMapHack(K key, Map<K, V> map) {
+        int index = 0;
+
+        for (K k : map.keySet()) {
+            if (k.equals(key)) {
+                return index;
+            }
+
+            ++index;
+        }
+
+        return -1;
     }
 
     private static <K, V> K getFromTreeMapHack(int key, Map<K, V> map) {
