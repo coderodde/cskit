@@ -2,6 +2,7 @@ package net.coderodde.cskit;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -77,39 +78,17 @@ public class Utilities {
         return cost;
     }
 
-    public static List<DirectedGraphNode> tracebackPath(DirectedGraphNode target,
+    public static List<DirectedGraphNode> tracebackPath(
+            DirectedGraphNode target,
             Map<DirectedGraphNode, DirectedGraphNode> parentMap) {
         ArrayList<DirectedGraphNode> path = new ArrayList<DirectedGraphNode>();
+
         while (target != null) {
             path.add(target);
             target = parentMap.get(target);
         }
-        java.util.Collections.reverse(path);
-        return path;
-    }
-
-    public static List<DirectedGraphNode> tracebackPathBidirectional(
-            DirectedGraphNode source,
-            DirectedGraphNode touch,
-            DirectedGraphNode target,
-            Map<DirectedGraphNode, DirectedGraphNode> PARENTA,
-            Map<DirectedGraphNode, DirectedGraphNode> PARENTB) {
-        ArrayList<DirectedGraphNode> path = new ArrayList<DirectedGraphNode>();
-        DirectedGraphNode current = touch;
-
-        while (current != null) {
-            path.add(current);
-            current = PARENTA.get(current);
-        }
 
         java.util.Collections.reverse(path);
-        current = PARENTB.get(touch);
-
-        while (current != null) {
-            path.add(current);
-            current = PARENTB.get(current);
-        }
-
         return path;
     }
 
@@ -266,6 +245,137 @@ public class Utilities {
         graph.get(graph.size() - 1).addChild(graph.get(0));
 
         return graph;
+    }
+
+    public static final Pair<List<DirectedGraphNode>, DoubleWeightFunction>
+            getWeightedGraph(int size, float elf, Random r) {
+        List<DirectedGraphNode> graph = new ArrayList<DirectedGraphNode>(size);
+        DoubleWeightFunction w = new DoubleWeightFunction();
+
+        for (int i = 0; i < size; ++i) {
+            graph.add(new DirectedGraphNode("" + i));
+        }
+
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                if (r.nextFloat() < elf) {
+                    graph.get(i).addChild(graph.get(j));
+                    w.put(graph.get(i), graph.get(j), 10.0 * r.nextDouble());
+                }
+            }
+        }
+
+        for (int i = 0; i < size - 1; ++i) {
+            graph.get(i).addChild(graph.get(i + 1));
+            w.put(graph.get(i), graph.get(i + 1), 10.0 * r.nextDouble());
+        }
+
+        graph.get(graph.size() - 1).addChild(graph.get(0));
+        w.put(graph.get(graph.size() - 1), graph.get(0), 1.0 * r.nextDouble());
+
+        return new Pair<List<DirectedGraphNode>, DoubleWeightFunction>
+                   (graph, w);
+    }
+
+    public static final List<DirectedGraphNode>
+            copy(List<DirectedGraphNode> graph) {
+        List<DirectedGraphNode> copyGraph =
+                new ArrayList<DirectedGraphNode>(graph.size());
+
+        Map<DirectedGraphNode, DirectedGraphNode> map =
+                   new HashMap<DirectedGraphNode,
+                               DirectedGraphNode>(graph.size());
+
+        for (DirectedGraphNode u : graph) {
+            DirectedGraphNode copy = new DirectedGraphNode(u.getName());
+            copyGraph.add(copy);
+            map.put(u, copy);
+        }
+
+        for (DirectedGraphNode u : graph) {
+            DirectedGraphNode copyFrom = map.get(u);
+
+            for (DirectedGraphNode child : u) {
+                DirectedGraphNode copyTo = map.get(child);
+                copyFrom.addChild(copyTo);
+            }
+        }
+
+        return copyGraph;
+    }
+
+    public static final List<DirectedGraphNode>
+            getResidualGraphOf(List<DirectedGraphNode> graph) {
+        List<DirectedGraphNode> residualGraph =
+                new ArrayList<DirectedGraphNode>(graph.size());
+
+        Map<DirectedGraphNode, DirectedGraphNode> map =
+                   new HashMap<DirectedGraphNode,
+                               DirectedGraphNode>(graph.size());
+
+        for (DirectedGraphNode u : graph) {
+            DirectedGraphNode copy = new DirectedGraphNode(u.getName());
+            residualGraph.add(copy);
+            map.put(u, copy);
+        }
+
+        for (DirectedGraphNode u : graph) {
+            DirectedGraphNode from = u;
+            DirectedGraphNode residualTo = map.get(u);
+
+            for (DirectedGraphNode child : u) {
+                DirectedGraphNode residualFrom = map.get(child);
+                residualFrom.addChild(residualTo);
+            }
+        }
+
+        return residualGraph;
+    }
+
+    public static final Pair<List<DirectedGraphNode>, DoubleWeightFunction>
+            getRandomFlowNetwork(int size,
+                                 float elf,
+                                 Random r,
+                                 double maxCapacity) {
+        List<DirectedGraphNode> graph = new ArrayList<DirectedGraphNode>(size);
+        DoubleWeightFunction c = new DoubleWeightFunction();
+
+        for (int i = 0; i < size; ++i) {
+            graph.add(new DirectedGraphNode("" + i));
+        }
+
+        for (int i = 1; i < size; ++i) {
+            for (int j = 0; j < i; ++j) {
+                if (r.nextFloat() < elf) {
+                    DirectedGraphNode from = graph.get(i);
+                    DirectedGraphNode to = graph.get(j);
+
+                    from.addChild(to);
+                    c.put(from, to, maxCapacity * r.nextDouble());
+                }
+            }
+        }
+
+        for (int i = 0; i < size - 1; ++i) {
+            DirectedGraphNode from = graph.get(i);
+            DirectedGraphNode to = graph.get(i + 1);
+
+            from.addChild(to);
+            c.put(from, to, maxCapacity * r.nextDouble());
+        }
+
+        graph.get(graph.size() - 1).addChild(graph.get(0));
+        c.put(graph.get(graph.size() - 1),
+              graph.get(0),
+              maxCapacity * r.nextDouble());
+
+        return new Pair<List<DirectedGraphNode>, DoubleWeightFunction>(
+                graph,
+                c);
+    }
+
+    public static boolean epsilon(double a, double b, double e) {
+        return Math.abs(a - b) < e;
     }
 
     /**

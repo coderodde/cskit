@@ -1,7 +1,10 @@
 package net.coderodde.cskit.graph;
 
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -23,13 +26,15 @@ public class DirectedGraphNodeTest {
         A.addChild(B2);
         C.addChild(A); // C is a parent of A.
 
-        Iterator<DirectedGraphNode> childIterOfA = A.iterator();
+        Set<DirectedGraphNode> childrenSet = new HashSet<DirectedGraphNode>();
 
-        assertTrue(childIterOfA.hasNext());
-        assertEquals(B1, childIterOfA.next());
-        assertTrue(childIterOfA.hasNext());
-        assertEquals(B2, childIterOfA.next());
-        assertFalse(childIterOfA.hasNext());
+        for (DirectedGraphNode u : A) {
+            childrenSet.add(u);
+        }
+
+        assertTrue(childrenSet.contains(B1));
+        assertTrue(childrenSet.contains(B2));
+        assertEquals(2, childrenSet.size());
 
         ////
 
@@ -71,9 +76,28 @@ public class DirectedGraphNodeTest {
 
         Iterator<DirectedGraphNode> iterOfA = A.iterator();
 
-        assertTrue(iterOfA.hasNext());
         assertEquals(B1, iterOfA.next());
-        A.removeChild(B2);
-        iterOfA.hasNext(); // this must throw.
+        A.removeChild(B1);
+        iterOfA.next(); // this must throw.
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void iterationThrowsNoSuchElementExceptionWhenDone() {
+        DirectedGraphNode A = new DirectedGraphNode("A");
+        DirectedGraphNode B1 = new DirectedGraphNode("B1");
+        DirectedGraphNode B2 = new DirectedGraphNode("B2");
+
+        A.addChild(B1);
+        A.addChild(B2);
+        Iterator<DirectedGraphNode> iter = A.iterator();
+
+        assertTrue(iter.hasNext());
+        assertEquals(B1, iter.next());
+
+        assertTrue(iter.hasNext());
+        assertEquals(B2, iter.next());
+
+        assertFalse(iter.hasNext());
+        iter.next(); // this must throw.
     }
 }

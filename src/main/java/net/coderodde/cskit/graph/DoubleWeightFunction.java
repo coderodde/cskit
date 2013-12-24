@@ -91,6 +91,10 @@ implements WeightFunction<DirectedGraphNode, Double> {
      * @return the weight of the edge.
      */
     public Double get(DirectedGraphNode from, DirectedGraphNode to) {
+        if (map.get(from) == null || map.get(from).get(to) == null) {
+            return 0.0;
+        }
+        
         return map.get(from).get(to);
     }
 

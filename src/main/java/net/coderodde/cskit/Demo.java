@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
@@ -30,6 +31,7 @@ import net.coderodde.cskit.sorting.TreeSort;
 import static net.coderodde.cskit.Utilities.Triple;
 import static net.coderodde.cskit.Utilities.allWeakEquals;
 import static net.coderodde.cskit.Utilities.debugPrintArray;
+import static net.coderodde.cskit.Utilities.epsilon;
 import static net.coderodde.cskit.Utilities.generateSimpleGraph;
 import static net.coderodde.cskit.Utilities.getPathCost;
 import static net.coderodde.cskit.Utilities.getPresortedArray;
@@ -42,6 +44,9 @@ import static net.coderodde.cskit.Utilities.pathsAreSame;
 import static net.coderodde.cskit.Utilities.title;
 import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.tree.OrderStatisticTree;
+import net.coderodde.cskit.graph.flow.BidirectionalEdmondKarpFlowFinder;
+import net.coderodde.cskit.graph.flow.EdmondKarpFlowFinder;
+import net.coderodde.cskit.graph.flow.FlowFinder;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -59,6 +64,7 @@ public class Demo{
         profileShortestPathAlgorithms();
         profileBreadthFirstSearchAlgorithms();
         profileOrderStatisticTree();
+        profileMaxFlowAlgorithms();
     }
 
     public static void profileOrderStatisticTree() {
@@ -522,5 +528,110 @@ public class Demo{
 
         System.out.println("size: " + tree.size());
         System.out.println("Healthy: " + tree.isHealthy());
+    }
+
+    private static void debugEdmondKarp() {
+        DirectedGraphNode Vancouver = new DirectedGraphNode("Vancover");
+        DirectedGraphNode Edmonton = new DirectedGraphNode("Edmonton");
+        DirectedGraphNode Calgary = new DirectedGraphNode("Calgary");
+        DirectedGraphNode Saskatoon = new DirectedGraphNode("Saskatoon");
+        DirectedGraphNode Regina = new DirectedGraphNode("Regina");
+        DirectedGraphNode Winnipeg = new DirectedGraphNode("Winnipeg");
+
+        DoubleWeightFunction c = new DoubleWeightFunction();
+
+        /// 1 - 3
+        Vancouver.addChild(Edmonton);
+        c.put(Vancouver, Edmonton, 16.0);
+
+        Vancouver.addChild(Calgary);
+        c.put(Vancouver, Calgary, 13.0);
+
+        Calgary.addChild(Edmonton);
+        c.put(Calgary, Edmonton, 4.0);
+
+        /// 4 - 6
+        Edmonton.addChild(Saskatoon);
+        c.put(Edmonton, Saskatoon, 12.0);
+
+        Saskatoon.addChild(Calgary);
+        c.put(Saskatoon, Calgary, 9.0);
+
+        Calgary.addChild(Regina);
+        c.put(Calgary, Regina, 14.0);
+
+        /// 7 - 9
+        Saskatoon.addChild(Winnipeg);
+        c.put(Saskatoon, Winnipeg, 20.0);
+
+        Regina.addChild(Saskatoon);
+        c.put(Regina, Saskatoon, 7.0);
+
+        Regina.addChild(Winnipeg);
+        c.put(Regina, Winnipeg, 4.0);
+
+        Pair<DoubleWeightFunction, Double> pair =
+                new EdmondKarpFlowFinder().find(Vancouver, Winnipeg, c);
+
+        System.out.println("EdmondKarpFlowFinder: " + pair.second);
+
+        Pair<DoubleWeightFunction, Double> pair2 =
+                new BidirectionalEdmondKarpFlowFinder().find(Vancouver,
+                                                             Winnipeg,
+                                                             c);
+
+        System.out.println("BidirectionalEdmonFlowFinder: " + pair2.second);
+    }
+
+    private static void profileMaxFlowAlgorithms() {
+        final int N = 10000;
+        final float ELF = 5.0f / N;
+        final long SEED = System.currentTimeMillis(); // 1387892121256L; //System.currentTimeMillis();
+
+        title("Max-flow algorithm demo");
+        System.out.println("Seed: " + SEED);
+
+        Random r = new Random(SEED);
+
+        Pair<List<DirectedGraphNode>, DoubleWeightFunction> pair =
+                Utilities.getRandomFlowNetwork(N, ELF, r, 10.0);
+
+        FlowFinder.resolveParallelEdges(pair.first, pair.second);
+        FlowFinder.removeSelfLoops(pair.first);
+
+        DirectedGraphNode source = pair.first.get(r.nextInt(N));
+        DirectedGraphNode sink = pair.first.get(r.nextInt(N));
+
+        System.out.println("Source: " + source.toString());
+        System.out.println("Sink:   " + sink.toString());
+
+        long ta = System.currentTimeMillis();
+
+        Pair<DoubleWeightFunction, Double> result1 =
+                new EdmondKarpFlowFinder()
+                .find(source, sink, pair.second);
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("EdmondKarpFlowFinder in " + (tb - ta) + " ms, "
+                + " |f| = " + result1.second);
+
+        ta = System.currentTimeMillis();
+
+        Pair<DoubleWeightFunction, Double> result2 =
+                new BidirectionalEdmondKarpFlowFinder()
+                .find(source, sink, pair.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("BidirectionalEdmondKarpFlowFinder in " + (tb - ta)
+                + " ms, "  + " |f| = " + result2.second);
+
+        line();
+
+        System.out.println(
+                "Flows equal: " + epsilon(result1.second,
+                                          result2.second,
+                                          0.001));
     }
 }

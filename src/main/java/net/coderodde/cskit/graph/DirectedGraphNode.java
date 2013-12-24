@@ -4,9 +4,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import static net.coderodde.cskit.Utilities.checkNotNull;
 import static net.coderodde.cskit.Utilities.checkModCount;
+import static net.coderodde.cskit.Utilities.checkNotNull;
+import net.coderodde.cskit.AllIterable;
 import net.coderodde.cskit.ParentIterable;
 
 /**
@@ -16,7 +16,10 @@ import net.coderodde.cskit.ParentIterable;
  * @version 1.6 (7.12.2013)
  */
 public class DirectedGraphNode
-implements Iterable<DirectedGraphNode>, ParentIterable<DirectedGraphNode> {
+implements
+Iterable<DirectedGraphNode>,
+ParentIterable<DirectedGraphNode>,
+AllIterable<DirectedGraphNode> {
 
     public static final float DEFAULT_LOAD_FACTOR = 1.05f;
 
@@ -63,6 +66,10 @@ implements Iterable<DirectedGraphNode>, ParentIterable<DirectedGraphNode> {
         this(name, DEFAULT_INITIAL_CAPACITY);
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return "[Node: " + name + "]";
@@ -79,9 +86,11 @@ implements Iterable<DirectedGraphNode>, ParentIterable<DirectedGraphNode> {
     }
 
     public void addChild(DirectedGraphNode child) {
-        modCount++;
-        this.out.add(child);
-        child.in.add(this);
+        if (this.out.contains(child) == false) {
+            modCount++;
+            this.out.add(child);
+            child.in.add(this);
+        }
     }
 
     public boolean hasChild(DirectedGraphNode candidate) {
@@ -94,12 +103,19 @@ implements Iterable<DirectedGraphNode>, ParentIterable<DirectedGraphNode> {
         child.in.remove(this);
     }
 
+    @Override
     public Iterator<DirectedGraphNode> iterator() {
         return new ChildIterator();
     }
 
+    @Override
     public Iterable<DirectedGraphNode> parentIterable() {
         return new ParentIterable();
+    }
+
+    @Override
+    public Iterable<DirectedGraphNode> allIterable() {
+        return new AllIterable();
     }
 
     /**
@@ -184,6 +200,31 @@ implements Iterable<DirectedGraphNode>, ParentIterable<DirectedGraphNode> {
         }
     }
 
+    private class AllIterator implements Iterator<DirectedGraphNode> {
+
+        private ChildIterator childIterator = new ChildIterator();
+        private ParentIterator parentIterator = new ParentIterator();
+
+        @Override
+        public boolean hasNext() {
+            return childIterator.hasNext() || parentIterator.hasNext();
+        }
+
+        @Override
+        public DirectedGraphNode next() {
+            return childIterator.hasNext() ?
+                   childIterator.next() :
+                   parentIterator.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException(
+                    "Compound iterator does not support remove()."
+                    );
+        }
+    }
+
     /**
      * This class solely wraps an iterator over this node's parents.
      */
@@ -192,6 +233,19 @@ implements Iterable<DirectedGraphNode>, ParentIterable<DirectedGraphNode> {
         @Override
         public Iterator<DirectedGraphNode> iterator() {
             return new ParentIterator();
+        }
+
+    }
+
+    /**
+     * This class solely wraps an iterator over this node's parents and
+     * children.
+     */
+    private class AllIterable implements Iterable<DirectedGraphNode> {
+
+        @Override
+        public Iterator<DirectedGraphNode> iterator() {
+            return new AllIterator();
         }
 
     }
