@@ -20,18 +20,18 @@ import net.coderodde.cskit.graph.DirectedGraphNode;
  */
 public class BreadthFirstSearchFinder implements UniformCostPathFinder {
 
+    private final Map<DirectedGraphNode, DirectedGraphNode> parentMap =
+          new HashMap<DirectedGraphNode, DirectedGraphNode>();
+
     @Override
     public List<DirectedGraphNode> find(DirectedGraphNode source,
                                         DirectedGraphNode target) {
-        Map<DirectedGraphNode, DirectedGraphNode> parentMap =
-                new HashMap<DirectedGraphNode, DirectedGraphNode>();
-
-        Set<DirectedGraphNode> CLOSED = new HashSet<DirectedGraphNode>();
+        parentMap.clear();
+        
         Deque<DirectedGraphNode> Q = new LinkedList<DirectedGraphNode>();
 
         Q.addLast(source);
         parentMap.put(source, null);
-        CLOSED.add(source);
 
         while (Q.isEmpty() == false) {
             DirectedGraphNode current = Q.removeFirst();
@@ -41,8 +41,7 @@ public class BreadthFirstSearchFinder implements UniformCostPathFinder {
             }
 
             for (DirectedGraphNode child : current) {
-                if (CLOSED.contains(child) == false) {
-                    CLOSED.add(child);
+                if (parentMap.containsKey(child) == false) {
                     Q.addLast(child);
                     parentMap.put(child, current);
                 }
