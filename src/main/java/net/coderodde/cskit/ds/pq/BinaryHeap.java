@@ -11,7 +11,8 @@ import net.coderodde.cskit.ds.pq.PriorityQueue;
  * @author Rodion Efremov
  * @version 1.618 (11.12.2013)
  */
-public class BinaryHeap<E> implements PriorityQueue<E> {
+public class BinaryHeap<E, W extends Comparable<? super W>>
+implements PriorityQueue<E, W> {
 
     private static final float LOAD_FACTOR = 1.05f;
     private static final int DEFAULT_CAPACITY = 1024;
@@ -27,16 +28,16 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
     }
 
     @Override
-    public PriorityQueue<E> newInstance() {
-        return new BinaryHeap<E>(nodeArray.length);
+    public PriorityQueue<E, W> newInstance() {
+        return new BinaryHeap<E, W>(nodeArray.length);
     }
 
-    private static class HeapNode<E> {
+    private static class HeapNode<E, W> {
         E element;
+        W priority;
         int index;
-        double priority;
 
-        HeapNode(E element, double priority) {
+        HeapNode(E element, W priority) {
             this.element = element;
             this.priority = priority;
         }
@@ -46,8 +47,8 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
      * The amount of elements in this heap.
      */
     private int size;
-    private HeapNode<E>[] nodeArray;
-    private Map<E, HeapNode<E>> map;
+    private HeapNode<E, W>[] nodeArray;
+    private Map<E, HeapNode<E, W>> map;
 
     /**
      * Constructs a binary heap with initial capacity <code>capacity</code>.
@@ -57,7 +58,7 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
     public BinaryHeap(int capacity) {
         capacity = checkCapacity(capacity);
         this.nodeArray = new HeapNode[capacity];
-        this.map = new HashMap<E, HeapNode<E>>(capacity, LOAD_FACTOR);
+        this.map = new HashMap<E, HeapNode<E, W>>(capacity, LOAD_FACTOR);
     }
 
     /**
@@ -74,7 +75,7 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
      * @param priority the priority of the element.
      */
     @Override
-    public void insert(E e, double priority) {
+    public void insert(E e, W priority) {
         if (map.containsKey(e)) {
             return;
         }
@@ -84,15 +85,15 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
         }
 
         int index = size;
-        HeapNode<E> node = new HeapNode<E>(e, priority);
+        HeapNode<E, W> node = new HeapNode<E, W>(e, priority);
 
         // Sift up the node containing the input element until min-heap property
         // is arranged.
         while (index > 0) {
             int parent = (index - 1) >>> 1;
-            HeapNode<E> p = nodeArray[parent];
+            HeapNode<E, W> p = nodeArray[parent];
 
-            if (priority >= p.priority) {
+            if (priority.compareTo(p.priority) >= 0) {
                 break;
             }
 
@@ -108,10 +109,10 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
     }
 
     @Override
-    public void decreasePriority(E e, double newPriority) {
-        HeapNode<E> node = map.get(e);
+    public void decreasePriority(E e, W newPriority) {
+        HeapNode<E, W> node = map.get(e);
 
-        if (node == null || node.priority <= newPriority) {
+        if (node == null || node.priority.compareTo(newPriority) <= 0) {
             return;
         }
 
@@ -121,7 +122,8 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
 
         for (;;) {
             if (parentIndex >= 0
-                    && nodeArray[parentIndex].priority > node.priority) {
+                    && nodeArray[parentIndex]
+                      .priority.compareTo(node.priority) > 0) {
                 nodeArray[index] = nodeArray[parentIndex];
                 nodeArray[index].index = index;
                 index = parentIndex;
@@ -151,7 +153,7 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
 
         E element = nodeArray[0].element;
         map.remove(element);
-        HeapNode<E> node = nodeArray[--size];
+        HeapNode<E, W> node = nodeArray[--size];
         nodeArray[size] = null;
 
         int nodeIndex = 0;
@@ -171,11 +173,12 @@ public class BinaryHeap<E> implements PriorityQueue<E> {
 
             if (rightChildIndex < size
                     && nodeArray[leftChildIndex].priority
-                     > nodeArray[rightChildIndex].priority) {
+                      .compareTo(nodeArray[rightChildIndex].priority) > 0) {
                 minChildIndex = rightChildIndex;
             }
 
-            if (node.priority > nodeArray[minChildIndex].priority) {
+            if (node.priority
+                    .compareTo(nodeArray[minChildIndex].priority) > 0) {
                 nodeArray[nodeIndex] = nodeArray[minChildIndex];
                 nodeArray[nodeIndex].index = nodeIndex;
 

@@ -6,7 +6,7 @@ package net.coderodde.cskit.ds.pq;
  * @author Rodion Efremov
  * @version 1.618 (11.12.2013)
  */
-public interface PriorityQueue<E> {
+public interface PriorityQueue<E, W extends Comparable<? super W>> {
 
     /**
      * Inserts a new element into this priority queue.
@@ -14,7 +14,7 @@ public interface PriorityQueue<E> {
      * @param e the element to insert.
      * @param priority the initial priority of the element.
      */
-    public void insert(E e, double priority);
+    public void insert(E e, W priority);
 
     /**
      * Decreases the priority of the specified element.
@@ -22,7 +22,7 @@ public interface PriorityQueue<E> {
      * @param e the element to decrease.
      * @param newPriority the new priority of the element.
      */
-    public void decreasePriority(E e, double newPriority);
+    public void decreasePriority(E e, W newPriority);
 
     /**
      * Returns the size of this queue.
@@ -68,5 +68,5 @@ public interface PriorityQueue<E> {
     /**
      * Spawns another empty queue.
      */
-    public PriorityQueue<E> newInstance();
+    public PriorityQueue<E, W> newInstance();
 }

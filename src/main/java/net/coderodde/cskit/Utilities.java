@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
 import net.coderodde.cskit.graph.p2psp.general.HeuristicFunction;
 import net.coderodde.cskit.sorting.Range;
@@ -68,7 +68,7 @@ public class Utilities {
     }
 
     public static double getPathCost(List<DirectedGraphNode> path,
-                                     DoubleWeightFunction w) {
+                                     WeightFunction w) {
         double cost = 0;
 
         for (int i = 0; i < path.size() - 1; ++i) {
@@ -247,10 +247,10 @@ public class Utilities {
         return graph;
     }
 
-    public static final Pair<List<DirectedGraphNode>, DoubleWeightFunction>
+    public static final Pair<List<DirectedGraphNode>, WeightFunction>
             getWeightedGraph(int size, float elf, Random r) {
         List<DirectedGraphNode> graph = new ArrayList<DirectedGraphNode>(size);
-        DoubleWeightFunction w = new DoubleWeightFunction();
+        WeightFunction w = new WeightFunction();
 
         for (int i = 0; i < size; ++i) {
             graph.add(new DirectedGraphNode("" + i));
@@ -273,7 +273,7 @@ public class Utilities {
         graph.get(graph.size() - 1).addChild(graph.get(0));
         w.put(graph.get(graph.size() - 1), graph.get(0), 1.0 * r.nextDouble());
 
-        return new Pair<List<DirectedGraphNode>, DoubleWeightFunction>
+        return new Pair<List<DirectedGraphNode>, WeightFunction>
                    (graph, w);
     }
 
@@ -332,13 +332,13 @@ public class Utilities {
         return residualGraph;
     }
 
-    public static final Pair<List<DirectedGraphNode>, DoubleWeightFunction>
+    public static final Pair<List<DirectedGraphNode>, WeightFunction>
             getRandomFlowNetwork(int size,
                                  float elf,
                                  Random r,
                                  double maxCapacity) {
         List<DirectedGraphNode> graph = new ArrayList<DirectedGraphNode>(size);
-        DoubleWeightFunction c = new DoubleWeightFunction();
+        WeightFunction c = new WeightFunction();
 
         for (int i = 0; i < size; ++i) {
             graph.add(new DirectedGraphNode("" + i));
@@ -369,7 +369,7 @@ public class Utilities {
               graph.get(0),
               maxCapacity * r.nextDouble());
 
-        return new Pair<List<DirectedGraphNode>, DoubleWeightFunction>(
+        return new Pair<List<DirectedGraphNode>, WeightFunction>(
                 graph,
                 c);
     }
@@ -387,7 +387,7 @@ public class Utilities {
      * @return the graph structures.
      */
     public static final Triple<List<DirectedGraphNode>,
-                               DoubleWeightFunction,
+                               WeightFunction,
                                CoordinateMap> getRandomGraph(
                                     int size,
                                     float elf,
@@ -395,7 +395,7 @@ public class Utilities {
                                     HeuristicFunction f) {
         ArrayList<DirectedGraphNode> graph =
                 new ArrayList<DirectedGraphNode>(size);
-        DoubleWeightFunction w = new DoubleWeightFunction();
+        WeightFunction w = new WeightFunction();
         CoordinateMap m = new CoordinateMap(4, size);
 
         for (int i = 0; i < size; ++i) {
@@ -431,7 +431,7 @@ public class Utilities {
                           m.get(graph.get(0))));
 
         return new Triple<List<DirectedGraphNode>,
-                          DoubleWeightFunction,
+                          WeightFunction,
                           CoordinateMap>(graph, w, m);
 
     }

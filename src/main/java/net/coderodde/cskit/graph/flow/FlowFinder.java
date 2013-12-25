@@ -11,7 +11,7 @@ import java.util.Set;
 import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.Utilities.Triple;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 
 /**
  * This abstract class defines the API for maximum-flow algorithms.
@@ -21,13 +21,12 @@ import net.coderodde.cskit.graph.DoubleWeightFunction;
  */
 public abstract class FlowFinder {
 
-    public abstract Pair<DoubleWeightFunction, Double>
-            find(DirectedGraphNode source,
-                 DirectedGraphNode sink,
-                 DoubleWeightFunction w);
+    public abstract Pair<WeightFunction, Double> find(DirectedGraphNode source,
+                                                      DirectedGraphNode sink,
+                                                      WeightFunction w);
 
     public static final void resolveParallelEdges(
-            List<DirectedGraphNode> graph, DoubleWeightFunction w) {
+            List<DirectedGraphNode> graph, WeightFunction w) {
         List<DirectedGraphNode> toAdd = new ArrayList<DirectedGraphNode>();
         int index = 0;
 
@@ -62,7 +61,7 @@ public abstract class FlowFinder {
     }
 
     public static final DirectedGraphNode
-            createSuperSource(DoubleWeightFunction w,
+            createSuperSource(WeightFunction w,
                               DirectedGraphNode... sources) {
         DirectedGraphNode superSource = new DirectedGraphNode("Super source");
 
@@ -75,7 +74,7 @@ public abstract class FlowFinder {
     }
 
     public static final DirectedGraphNode
-            createSuperSink(DoubleWeightFunction w,
+            createSuperSink(WeightFunction w,
                             DirectedGraphNode... sinks) {
         DirectedGraphNode superSink = new DirectedGraphNode("Super sink");
 
@@ -89,8 +88,8 @@ public abstract class FlowFinder {
 
     protected double residualEdgeWeight(DirectedGraphNode from,
                                         DirectedGraphNode to,
-                                        DoubleWeightFunction f,
-                                        DoubleWeightFunction c) {
+                                        WeightFunction f,
+                                        WeightFunction c) {
         if (from.hasChild(to)) {
             return c.get(from, to) - f.get(from, to);
         } else if (to.hasChild(from)) {

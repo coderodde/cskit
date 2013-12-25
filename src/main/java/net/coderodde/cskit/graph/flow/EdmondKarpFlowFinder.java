@@ -10,7 +10,7 @@ import java.util.Set;
 import net.coderodde.cskit.Utilities;
 import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 
 /**
  * This class implements the Edmond-Karp maximum-flow algorithm.
@@ -21,11 +21,11 @@ import net.coderodde.cskit.graph.DoubleWeightFunction;
 public class EdmondKarpFlowFinder extends FlowFinder {
 
     @Override
-    public Pair<DoubleWeightFunction, Double> find(DirectedGraphNode source,
-                                                   DirectedGraphNode sink,
-                                                   DoubleWeightFunction c) {
+    public Pair<WeightFunction, Double> find(DirectedGraphNode source,
+                                             DirectedGraphNode sink,
+                                             WeightFunction c) {
         double flow = 0.0;
-        DoubleWeightFunction f = new DoubleWeightFunction(); // The flow map.
+        WeightFunction f = new WeightFunction(); // The flow map.
         List<DirectedGraphNode> path = null;
 
         while ((path = findAugmentingPath(source, sink, c, f)).size() > 1) {
@@ -33,7 +33,7 @@ public class EdmondKarpFlowFinder extends FlowFinder {
             flow += df;
         }
 
-        return new Pair<DoubleWeightFunction, Double>(f, flow);
+        return new Pair<WeightFunction, Double>(f, flow);
     }
 
     /**
@@ -48,8 +48,8 @@ public class EdmondKarpFlowFinder extends FlowFinder {
      */
     private List<DirectedGraphNode> findAugmentingPath(DirectedGraphNode source,
                                                        DirectedGraphNode sink,
-                                                       DoubleWeightFunction c,
-                                                       DoubleWeightFunction f) {
+                                                       WeightFunction c,
+                                                       WeightFunction f) {
         Deque<DirectedGraphNode> queue = new LinkedList<DirectedGraphNode>();
         Map<DirectedGraphNode, DirectedGraphNode> parentMap =
                    new HashMap<DirectedGraphNode, DirectedGraphNode>();
@@ -80,8 +80,8 @@ public class EdmondKarpFlowFinder extends FlowFinder {
     }
 
     private double findMinimumEdgeAndRemove(List<DirectedGraphNode> path,
-                                            DoubleWeightFunction c,
-                                            DoubleWeightFunction f) {
+                                            WeightFunction c,
+                                            WeightFunction f) {
         double min = Double.POSITIVE_INFINITY;
 
         for (int i = 0; i < path.size() - 1; ++i) {

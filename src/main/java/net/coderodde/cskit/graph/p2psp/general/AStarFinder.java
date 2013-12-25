@@ -1,9 +1,10 @@
 package net.coderodde.cskit.graph.p2psp.general;
 
 import java.util.List;
+import static net.coderodde.cskit.Utilities.tracebackPath;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 
 /**
  * This class implements <tt>A*</tt>-search algorithm.
@@ -15,14 +16,16 @@ public class AStarFinder extends GeneralPathFinder {
 
     private HeuristicFunction h;
 
-    public AStarFinder(PriorityQueue<DirectedGraphNode> OPEN,
+    public AStarFinder(PriorityQueue<DirectedGraphNode, Double> OPEN,
                        HeuristicFunction h) {
         super(OPEN);
         this.h = h;
     }
 
     @Override
-    public List<DirectedGraphNode> find(DirectedGraphNode source, DirectedGraphNode target, DoubleWeightFunction w) {
+    public List<DirectedGraphNode> find(DirectedGraphNode source,
+                                        DirectedGraphNode target,
+                                        WeightFunction w) {
         h.setTarget(target);
         OPEN.clear();
         CLOSED.clear();
@@ -50,6 +53,7 @@ public class AStarFinder extends GeneralPathFinder {
                 double tmpg = GSCORE_MAP.get(current) + w.get(current, child);
 
                 if (GSCORE_MAP.containsKey(child) == false) {
+                    OPEN.insert(child, tmpg);
                     OPEN.insert(child, tmpg + h.get(child));
                     GSCORE_MAP.put(child, tmpg);
                     PARENT_MAP.put(child, current);

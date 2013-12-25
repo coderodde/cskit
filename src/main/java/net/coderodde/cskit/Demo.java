@@ -9,7 +9,7 @@ import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 import net.coderodde.cskit.graph.p2psp.general.AStarFinder;
 import net.coderodde.cskit.graph.p2psp.general.BidirectionalDijkstraFinder;
 import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
@@ -397,7 +397,7 @@ public class Demo{
     }
 
     private static void profileBinaryHeap() {
-        BinaryHeap<Integer> heap = new BinaryHeap<Integer>();
+        BinaryHeap<Integer, Integer> heap = new BinaryHeap<Integer, Integer>();
 
         for (int i = 10; i > 0; --i) {
             heap.insert(i, i);
@@ -433,7 +433,7 @@ public class Demo{
 
         Random r = new Random();
         Triple<List<DirectedGraphNode>,
-               DoubleWeightFunction,
+               WeightFunction,
                CoordinateMap> triple = getRandomGraph(N, LOAD_FACTOR, r, new EuclidianMetric(null, null));
 
         DirectedGraphNode source = triple.first.get(r.nextInt(N));
@@ -442,8 +442,8 @@ public class Demo{
         System.out.println("Source: " + source.toString());
         System.out.println("Target: " + target.toString());
 
-        PriorityQueue<DirectedGraphNode> OPEN =
-                new BinaryHeap<DirectedGraphNode>(N);
+        PriorityQueue<DirectedGraphNode, Double> OPEN =
+                new BinaryHeap<DirectedGraphNode, Double>(N);
 
         GeneralPathFinder finder1 = new DijkstraFinder(OPEN);
 
@@ -458,7 +458,7 @@ public class Demo{
                 + "path connected: " + isConnectedPath(path1)
                 + ", cost: " + getPathCost(path1, triple.second));
 
-        OPEN = new BinaryHeap<DirectedGraphNode>(N);
+        OPEN = new BinaryHeap<DirectedGraphNode, Double>(N);
 
         GeneralPathFinder finder2 =
                 new AStarFinder(OPEN,
@@ -477,7 +477,7 @@ public class Demo{
                 + "path connected: " + isConnectedPath(path2)
                 + ", cost: " + getPathCost(path2, triple.second));
 
-        OPEN = new BinaryHeap<DirectedGraphNode>(N);
+        OPEN = new BinaryHeap<DirectedGraphNode, Double>(N);
 
         GeneralPathFinder finder3 =
                 new BidirectionalDijkstraFinder(OPEN);
@@ -538,7 +538,7 @@ public class Demo{
         DirectedGraphNode Regina = new DirectedGraphNode("Regina");
         DirectedGraphNode Winnipeg = new DirectedGraphNode("Winnipeg");
 
-        DoubleWeightFunction c = new DoubleWeightFunction();
+        WeightFunction c = new WeightFunction();
 
         /// 1 - 3
         Vancouver.addChild(Edmonton);
@@ -570,12 +570,12 @@ public class Demo{
         Regina.addChild(Winnipeg);
         c.put(Regina, Winnipeg, 4.0);
 
-        Pair<DoubleWeightFunction, Double> pair =
+        Pair<WeightFunction, Double> pair =
                 new EdmondKarpFlowFinder().find(Vancouver, Winnipeg, c);
 
         System.out.println("EdmondKarpFlowFinder: " + pair.second);
 
-        Pair<DoubleWeightFunction, Double> pair2 =
+        Pair<WeightFunction, Double> pair2 =
                 new BidirectionalEdmondKarpFlowFinder().find(Vancouver,
                                                              Winnipeg,
                                                              c);
@@ -593,7 +593,7 @@ public class Demo{
 
         Random r = new Random(SEED);
 
-        Pair<List<DirectedGraphNode>, DoubleWeightFunction> pair =
+        Pair<List<DirectedGraphNode>, WeightFunction> pair =
                 Utilities.getRandomFlowNetwork(N, ELF, r, 10.0);
 
         FlowFinder.resolveParallelEdges(pair.first, pair.second);
@@ -607,7 +607,7 @@ public class Demo{
 
         long ta = System.currentTimeMillis();
 
-        Pair<DoubleWeightFunction, Double> result1 =
+        Pair<WeightFunction, Double> result1 =
                 new EdmondKarpFlowFinder()
                 .find(source, sink, pair.second);
 
@@ -618,7 +618,7 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        Pair<DoubleWeightFunction, Double> result2 =
+        Pair<WeightFunction, Double> result2 =
                 new BidirectionalEdmondKarpFlowFinder()
                 .find(source, sink, pair.second);
 

@@ -8,7 +8,7 @@ import java.util.Set;
 import static net.coderodde.cskit.Utilities.tracebackPathBidirectional;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 
 /**
  * This class implements bidirectional Dijkstra's algorithm.
@@ -18,12 +18,13 @@ import net.coderodde.cskit.graph.DoubleWeightFunction;
  */
 public class BidirectionalDijkstraFinder extends GeneralPathFinder {
 
-    private PriorityQueue<DirectedGraphNode> OPENB;
+    private PriorityQueue<DirectedGraphNode, Double> OPENB;
     private Set<DirectedGraphNode> CLOSEDB;
     private Map<DirectedGraphNode, Double> GSCOREB;
     private Map<DirectedGraphNode, DirectedGraphNode> PARENTB;
 
-    public BidirectionalDijkstraFinder(PriorityQueue<DirectedGraphNode> OPEN) {
+    public BidirectionalDijkstraFinder(
+            PriorityQueue<DirectedGraphNode, Double> OPEN) {
         super(OPEN);
         OPEN.clear();
         // Use the same heap structure.
@@ -36,11 +37,11 @@ public class BidirectionalDijkstraFinder extends GeneralPathFinder {
     @Override
     public List<DirectedGraphNode> find(DirectedGraphNode source,
                                         DirectedGraphNode target,
-                                        DoubleWeightFunction w) {
+                                        WeightFunction w) {
 
-        PriorityQueue<DirectedGraphNode> OPENA = OPEN;
-        Set<DirectedGraphNode> CLOSEDA = CLOSED;
-        Map<DirectedGraphNode, Double> GSCOREA = GSCORE_MAP;
+        PriorityQueue<DirectedGraphNode, Double> OPENA    = OPEN;
+        Set<DirectedGraphNode> CLOSEDA                    = CLOSED;
+        Map<DirectedGraphNode, Double> GSCOREA            = GSCORE_MAP;
         Map<DirectedGraphNode, DirectedGraphNode> PARENTA = PARENT_MAP;
 
         OPENA.clear();
@@ -66,9 +67,8 @@ public class BidirectionalDijkstraFinder extends GeneralPathFinder {
 
         while ((OPENA.isEmpty() == false) && (OPENB.isEmpty() == false)) {
 
-            if (m < GSCOREA.get(OPENA.min())
-                  + GSCOREB.get(OPENB.min())) {
-                break;
+            if (m < GSCOREA.get(OPENA.min()) + GSCOREB.get(OPENB.min())) {
+                return tracebackPathBidirectional(touch, PARENTA, PARENTB);
             }
 
             DirectedGraphNode current = OPENA.extractMinimum();

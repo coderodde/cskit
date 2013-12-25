@@ -1,7 +1,6 @@
 package net.coderodde.cskit.graph.p2psp.general;
 
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import static net.coderodde.cskit.Utilities.checkNotNull;
 /**
  * This class defines the API for heuristic functions mainly used in
  * <tt>A*</tt>-search.
@@ -9,7 +8,7 @@ import static net.coderodde.cskit.Utilities.checkNotNull;
  * @author Rodion Efremov
  * @version 1.618 (16.12.2013)
  */
-public abstract class HeuristicFunction {
+public abstract class HeuristicFunction<W> {
 
     protected CoordinateMap map;
     protected DirectedGraphNode target;

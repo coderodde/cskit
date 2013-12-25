@@ -9,7 +9,7 @@ import net.coderodde.cskit.graph.DirectedGraphNode;
  * @author Rodion Efremov
  * @version 1.618 (16.12.2013)
  */
-public class ChebyshevMetric extends HeuristicFunction {
+public class ChebyshevMetric<W extends Comparable<? super W>> extends HeuristicFunction {
 
     private double[] p;
 
