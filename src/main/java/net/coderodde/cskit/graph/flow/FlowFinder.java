@@ -185,8 +185,8 @@ public abstract class FlowFinder {
         double delta = Math.min(e.get(from),
                                 residualEdgeWeight(from, to, f, c));
 
-//        f.put(from, to, f.get(from, to) + delta);
-//        f.put(to, from, f.get(to, from) - delta);
+        //f.put(from, to, f.get(from, to) + delta);
+        //f.put(to, from, f.get(to, from) - delta);
 
         if (from.hasChild(to)) {
             f.put(from, to, f.get(from, to) + delta);
@@ -211,20 +211,13 @@ public abstract class FlowFinder {
                                    null :
                                    neighborList.current.node);
 
-            //System.out.println("Funkying at " + v);
-
             if (v == null) {
-//                System.out.println("v == null");
-              //  System.out.println("relabeling " + u);
                 relabel(u, h, f, c);
                 neighborList.current = neighborList.head;
             } else if ((residualEdgeWeight(u, v, f, c) > 0.0)
                     && (h.get(u) == h.get(v) + 1)) {
-//                System.out.println("pushing from " + u + " to " + v +
-//                        "; e.get(u): " + e.get(u));
                 push(u, v, f, c, e);
             } else {
-//                System.out.println("next");
                 neighborList.current = neighborList.current.next;
             }
         }

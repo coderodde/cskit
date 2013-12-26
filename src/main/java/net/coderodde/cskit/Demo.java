@@ -31,7 +31,7 @@ import net.coderodde.cskit.sorting.TreeSort;
 import static net.coderodde.cskit.Utilities.Triple;
 import static net.coderodde.cskit.Utilities.allWeakEquals;
 import static net.coderodde.cskit.Utilities.debugPrintArray;
-import static net.coderodde.cskit.Utilities.epsilon;
+import static net.coderodde.cskit.Utilities.epsilonEquals;
 import static net.coderodde.cskit.Utilities.generateSimpleGraph;
 import static net.coderodde.cskit.Utilities.getPathCost;
 import static net.coderodde.cskit.Utilities.getPresortedArray;
@@ -589,13 +589,13 @@ public class Demo{
                                                         Winnipeg,
                                                         c);
 
-        System.out.println("GenericPushRelabelFlowFinder: " + pair3.second);
+        System.out.println("RelabelToFrontFlowFinder: " + pair3.second);
     }
 
     private static void profileMaxFlowAlgorithms() {
-        final int N = 100;
+        final int N = 1000;
         final float ELF = 5.0f / N;
-        final long SEED = 1387984656068L;
+        final long SEED = 1388054822944L; //System.currentTimeMillis();
 
         title("Max-flow algorithm demo");
         System.out.println("Seed: " + SEED);
@@ -610,9 +610,6 @@ public class Demo{
 
         DirectedGraphNode source = pair.first.get(r.nextInt(N));
         DirectedGraphNode sink = pair.first.get(r.nextInt(N));
-
-        FlowFinder.pruneSource(source);
-        FlowFinder.pruneSink(sink);
 
         System.out.println("Source: " + source.toString());
         System.out.println("Sink:   " + sink.toString());
@@ -653,8 +650,9 @@ public class Demo{
         line();
 
         System.out.println(
-                "Flows equal: " + epsilon(result1.second,
-                                          result2.second,
-                                          0.001));
+                "Flows equal: " + epsilonEquals(0.001,
+                                                result1.second,
+                                                result2.second,
+                                                result3.second));
     }
 }

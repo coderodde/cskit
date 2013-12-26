@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.coderodde.cskit.Utilities.Pair;
+import static net.coderodde.cskit.Utilities.expandGraph;
 import net.coderodde.cskit.graph.DirectedGraphNode;
 import net.coderodde.cskit.graph.WeightFunction;
-import static net.coderodde.cskit.Utilities.expandGraph;
 import net.coderodde.cskit.graph.flow.L.LNode;
 
 /**
@@ -54,8 +54,6 @@ public class RelabelToFrontFlowFinder extends FlowFinder {
 
         super.initializePreflow(graph, source, h, e, f, c);
 
-
-
         LNode uNode = pair.first.head;
         LNode previous = null;
 
@@ -73,11 +71,10 @@ public class RelabelToFrontFlowFinder extends FlowFinder {
                     uNode.next = tmpHead;
                     previous = null;
                 }
-//                System.out.println("Hell, no! :(");
-            } else {
-                previous = uNode;
-                uNode = uNode.next;
             }
+
+            previous = uNode;
+            uNode = uNode.next;
         }
 
         Pair<WeightFunction, Double> ret =

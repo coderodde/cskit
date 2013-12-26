@@ -377,8 +377,16 @@ public class Utilities {
                 c);
     }
 
-    public static boolean epsilon(double a, double b, double e) {
-        return Math.abs(a - b) < e;
+    public static boolean epsilonEquals(double e, double... values) {
+        for (int i = 0; i < values.length; ++i) {
+            for (int j = 0; j < values.length; ++j) {
+                if (Math.abs(values[i] - values[j]) > e) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
