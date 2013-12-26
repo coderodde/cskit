@@ -2,7 +2,10 @@ package net.coderodde.cskit;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -606,5 +609,27 @@ public class Utilities {
             array[j] = array[k];
             array[k] = tmp;
         }
+    }
+
+    public static final Set<DirectedGraphNode>
+            expandGraph(DirectedGraphNode u) {
+        Deque<DirectedGraphNode> queue = new LinkedList<DirectedGraphNode>();
+        Set<DirectedGraphNode> visited = new HashSet<DirectedGraphNode>();
+
+        queue.add(u);
+        visited.add(u);
+
+        while (queue.isEmpty() == false) {
+            DirectedGraphNode current = queue.removeFirst();
+
+            for (DirectedGraphNode child : current) {
+                if (visited.contains(child) == false) {
+                    visited.add(child);
+                    queue.addLast(child);
+                }
+            }
+        }
+
+        return visited;
     }
 }

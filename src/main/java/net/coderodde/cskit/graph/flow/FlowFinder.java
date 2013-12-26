@@ -1,15 +1,10 @@
 package net.coderodde.cskit.graph.flow;
 
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.coderodde.cskit.Utilities.Pair;
-import net.coderodde.cskit.Utilities.Triple;
 import net.coderodde.cskit.graph.DirectedGraphNode;
 import net.coderodde.cskit.graph.WeightFunction;
 
@@ -86,6 +81,46 @@ public abstract class FlowFinder {
         return superSink;
     }
 
+    public static final void pruneSource(DirectedGraphNode source) {
+        Iterator<DirectedGraphNode> iterator =
+                source.parentIterable().iterator();
+
+        while (iterator.hasNext()) {
+            iterator.next();
+            iterator.remove();
+        }
+    }
+
+    public static final void pruneSink(DirectedGraphNode sink) {
+        Iterator<DirectedGraphNode> iterator =
+                sink.iterator();
+
+        while (iterator.hasNext()) {
+            iterator.next();
+            iterator.remove();
+        }
+    }
+
+    protected double findMinimumEdgeAndRemove(List<DirectedGraphNode> path,
+                                            WeightFunction c,
+                                            WeightFunction f) {
+        double min = Double.POSITIVE_INFINITY;
+
+        for (int i = 0; i < path.size() - 1; ++i) {
+            if (min > residualEdgeWeight(path.get(i), path.get(i + 1), f, c)) {
+                min = residualEdgeWeight(path.get(i), path.get(i + 1), f, c);
+            }
+        }
+
+        for (int i = 0; i < path.size() - 1; ++i) {
+            DirectedGraphNode from = path.get(i);
+            DirectedGraphNode to = path.get(i + 1);
+            f.put(from, to, f.get(from, to) + min);
+        }
+
+        return min;
+    }
+
     protected double residualEdgeWeight(DirectedGraphNode from,
                                         DirectedGraphNode to,
                                         WeightFunction f,
@@ -96,6 +131,102 @@ public abstract class FlowFinder {
             return f.get(to, from);
         } else {
             return 0.0;
+        }
+    }
+
+    protected void initializePreflow(List<DirectedGraphNode> network,
+                                     DirectedGraphNode source,
+                                     Map<DirectedGraphNode, Integer> h,
+                                     Map<DirectedGraphNode, Double> e,
+                                     WeightFunction f,
+                                     WeightFunction c) {
+        for (DirectedGraphNode u : network) {
+            h.put(u, 0);
+            e.put(u, 0.0);
+        }
+
+        for (DirectedGraphNode from : network) {
+            for (DirectedGraphNode to : from) {
+                f.put(from, to, 0.0);
+            }
+        }
+
+        h.put(source, network.size());
+
+        for (DirectedGraphNode u : source) {
+            f.put(source, u, c.get(source, u));
+            e.put(u, c.get(source, u));
+            e.put(source, e.get(source) - c.get(source, u));
+        }
+    }
+
+    protected void relabel(DirectedGraphNode u,
+                           Map<DirectedGraphNode, Integer> h,
+                           WeightFunction f,
+                           WeightFunction c) {
+        int minh = Integer.MAX_VALUE;
+
+        for (DirectedGraphNode v : u.allIterable()) {
+            if (residualEdgeWeight(u, v, f, c) > 0.0) {
+                if (minh > h.get(v)) {
+                    minh = h.get(v);
+                }
+            }
+        }
+
+        h.put(u, minh + 1);
+    }
+
+    protected void push(DirectedGraphNode from,
+                        DirectedGraphNode to,
+                        WeightFunction f,
+                        WeightFunction c,
+                        Map<DirectedGraphNode, Double> e) {
+        double delta = Math.min(e.get(from),
+                                residualEdgeWeight(from, to, f, c));
+
+//        f.put(from, to, f.get(from, to) + delta);
+//        f.put(to, from, f.get(to, from) - delta);
+
+        if (from.hasChild(to)) {
+            f.put(from, to, f.get(from, to) + delta);
+        } else {
+            f.put(to, from, f.get(to, from) - delta);
+        }
+
+        e.put(from, e.get(from) - delta);
+        e.put(to, e.get(to) + delta);
+    }
+
+    protected void discharge(DirectedGraphNode u,
+                             Map<DirectedGraphNode, N> n,
+                             Map<DirectedGraphNode, Double> e,
+                             Map<DirectedGraphNode, Integer> h,
+                             WeightFunction f,
+                             WeightFunction c) {
+        N neighborList = n.get(u);
+
+        while (e.get(u) > 0.0) {
+            DirectedGraphNode v = (neighborList.current == null ?
+                                   null :
+                                   neighborList.current.node);
+
+            //System.out.println("Funkying at " + v);
+
+            if (v == null) {
+//                System.out.println("v == null");
+              //  System.out.println("relabeling " + u);
+                relabel(u, h, f, c);
+                neighborList.current = neighborList.head;
+            } else if ((residualEdgeWeight(u, v, f, c) > 0.0)
+                    && (h.get(u) == h.get(v) + 1)) {
+//                System.out.println("pushing from " + u + " to " + v +
+//                        "; e.get(u): " + e.get(u));
+                push(u, v, f, c, e);
+            } else {
+//                System.out.println("next");
+                neighborList.current = neighborList.current.next;
+            }
         }
     }
 }

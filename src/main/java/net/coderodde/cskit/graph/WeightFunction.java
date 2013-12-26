@@ -30,4 +30,8 @@ public class WeightFunction {
 
         return map.get(from).get(to);
     }
+
+    public void clear() {
+        map.clear();
+    }
 }

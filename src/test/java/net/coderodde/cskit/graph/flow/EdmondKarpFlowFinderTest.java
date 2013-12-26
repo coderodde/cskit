@@ -2,7 +2,7 @@ package net.coderodde.cskit.graph.flow;
 
 import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.DoubleWeightFunction;
+import net.coderodde.cskit.graph.WeightFunction;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -23,7 +23,7 @@ public class EdmondKarpFlowFinderTest {
         DirectedGraphNode Regina = new DirectedGraphNode("Regina");
         DirectedGraphNode Winnipeg = new DirectedGraphNode("Winnipeg");
 
-        DoubleWeightFunction c = new DoubleWeightFunction();
+        WeightFunction c = new WeightFunction();
 
         /// 1 - 3
         Vancouver.addChild(Edmonton);
@@ -55,7 +55,7 @@ public class EdmondKarpFlowFinderTest {
         Regina.addChild(Winnipeg);
         c.put(Regina, Winnipeg, 4.0);
 
-        Pair<DoubleWeightFunction, Double> pair =
+        Pair<WeightFunction, Double> pair =
                 new EdmondKarpFlowFinder().find(Vancouver, Winnipeg, c);
 
         assertEquals(23.0, pair.second, 0.01);

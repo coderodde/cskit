@@ -16,7 +16,8 @@ import static org.junit.Assert.*;
  * @author Rodion Efremov
  */
 public class BinaryHeapTest {
-    private BinaryHeap<Integer> pq = new BinaryHeap<Integer>(9);
+    private BinaryHeap<Integer, Integer> pq =
+            new BinaryHeap<Integer, Integer>(9);
 
     @Test(expected = NoSuchElementException.class)
     public void testSize() {

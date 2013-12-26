@@ -8,9 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.coderodde.cskit.Utilities.Pair;
 import static net.coderodde.cskit.Utilities.findTouchNode;
 import static net.coderodde.cskit.Utilities.tracebackPathBidirectional;
-import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.graph.DirectedGraphNode;
 import net.coderodde.cskit.graph.WeightFunction;
 
@@ -170,25 +170,5 @@ public class BidirectionalEdmondKarpFlowFinder extends FlowFinder {
         }
 
         return java.util.Collections.<DirectedGraphNode>emptyList();
-    }
-
-    private double findMinimumEdgeAndRemove(List<DirectedGraphNode> path,
-                                            WeightFunction c,
-                                            WeightFunction f) {
-        double min = Double.POSITIVE_INFINITY;
-
-        for (int i = 0; i < path.size() - 1; ++i) {
-            if (min > residualEdgeWeight(path.get(i), path.get(i + 1), f, c)) {
-                min = residualEdgeWeight(path.get(i), path.get(i + 1), f, c);
-            }
-        }
-
-        for (int i = 0; i < path.size() - 1; ++i) {
-            DirectedGraphNode from = path.get(i);
-            DirectedGraphNode to = path.get(i + 1);
-            f.put(from, to, f.get(from, to) + min);
-        }
-
-        return min;
     }
 }

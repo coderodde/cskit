@@ -47,6 +47,7 @@ import net.coderodde.cskit.ds.tree.OrderStatisticTree;
 import net.coderodde.cskit.graph.flow.BidirectionalEdmondKarpFlowFinder;
 import net.coderodde.cskit.graph.flow.EdmondKarpFlowFinder;
 import net.coderodde.cskit.graph.flow.FlowFinder;
+import net.coderodde.cskit.graph.flow.RelabelToFrontFlowFinder;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -54,17 +55,18 @@ import net.coderodde.cskit.graph.flow.FlowFinder;
 public class Demo{
 
     public static void main(String... args) {
-        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
-                                       new CombSort<Integer>(),
-                                       new CountingSort<Integer>(),
-                                       new HeapSelectionSort<Integer>(),
-                                       new IterativeMergeSort<Integer>(),
-                                       new NaturalMergeSort<Integer>(),
-                                       new TreeSort<Integer>());
-        profileShortestPathAlgorithms();
-        profileBreadthFirstSearchAlgorithms();
-        profileOrderStatisticTree();
+//        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
+//                                       new CombSort<Integer>(),
+//                                       new CountingSort<Integer>(),
+//                                       new HeapSelectionSort<Integer>(),
+//                                       new IterativeMergeSort<Integer>(),
+//                                       new NaturalMergeSort<Integer>(),
+//                                       new TreeSort<Integer>());
+//        profileShortestPathAlgorithms();
+//        profileBreadthFirstSearchAlgorithms();
+//        profileOrderStatisticTree();
         profileMaxFlowAlgorithms();
+//        debugMaxFlowAlgorithms();
     }
 
     public static void profileOrderStatisticTree() {
@@ -530,7 +532,7 @@ public class Demo{
         System.out.println("Healthy: " + tree.isHealthy());
     }
 
-    private static void debugEdmondKarp() {
+    private static void debugMaxFlowAlgorithms() {
         DirectedGraphNode Vancouver = new DirectedGraphNode("Vancover");
         DirectedGraphNode Edmonton = new DirectedGraphNode("Edmonton");
         DirectedGraphNode Calgary = new DirectedGraphNode("Calgary");
@@ -581,12 +583,19 @@ public class Demo{
                                                              c);
 
         System.out.println("BidirectionalEdmonFlowFinder: " + pair2.second);
+
+        Pair<WeightFunction, Double> pair3 =
+                new RelabelToFrontFlowFinder().find(Vancouver,
+                                                        Winnipeg,
+                                                        c);
+
+        System.out.println("GenericPushRelabelFlowFinder: " + pair3.second);
     }
 
     private static void profileMaxFlowAlgorithms() {
-        final int N = 10000;
+        final int N = 100;
         final float ELF = 5.0f / N;
-        final long SEED = System.currentTimeMillis(); // 1387892121256L; //System.currentTimeMillis();
+        final long SEED = 1387984656068L;
 
         title("Max-flow algorithm demo");
         System.out.println("Seed: " + SEED);
@@ -602,6 +611,9 @@ public class Demo{
         DirectedGraphNode source = pair.first.get(r.nextInt(N));
         DirectedGraphNode sink = pair.first.get(r.nextInt(N));
 
+        FlowFinder.pruneSource(source);
+        FlowFinder.pruneSink(sink);
+
         System.out.println("Source: " + source.toString());
         System.out.println("Sink:   " + sink.toString());
 
@@ -613,8 +625,8 @@ public class Demo{
 
         long tb = System.currentTimeMillis();
 
-        System.out.println("EdmondKarpFlowFinder in " + (tb - ta) + " ms, "
-                + " |f| = " + result1.second);
+        System.out.println("EdmondKarpFlowFinder in " + (tb - ta)
+                + " ms, |f| = " + result1.second);
 
         ta = System.currentTimeMillis();
 
@@ -625,7 +637,18 @@ public class Demo{
         tb = System.currentTimeMillis();
 
         System.out.println("BidirectionalEdmondKarpFlowFinder in " + (tb - ta)
-                + " ms, "  + " |f| = " + result2.second);
+                + " ms, |f| = " + result2.second);
+
+        ta = System.currentTimeMillis();
+
+        Pair<WeightFunction, Double> result3 =
+                new RelabelToFrontFlowFinder()
+                .find(source, sink, pair.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("RelabelToFrontFlowFinder in " + (tb - ta)
+                + " ms, |f| = " + result3.second);
 
         line();
 

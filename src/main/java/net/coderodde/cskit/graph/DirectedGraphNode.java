@@ -154,7 +154,7 @@ AllIterable<DirectedGraphNode> {
             }
 
             lastReturned.in.remove(DirectedGraphNode.this);
-            DirectedGraphNode.this.out.remove(lastReturned);
+            iterator.remove();
             lastReturned = null;
         }
     }
@@ -164,7 +164,7 @@ AllIterable<DirectedGraphNode> {
      */
     private class ParentIterator implements Iterator<DirectedGraphNode> {
 
-        private final long expectedModCount = DirectedGraphNode.this.modCount;
+        private long expectedModCount = DirectedGraphNode.this.modCount;
         private DirectedGraphNode lastReturned;
         private Iterator<DirectedGraphNode> iterator =
                 DirectedGraphNode.this.in.iterator();
@@ -195,7 +195,7 @@ AllIterable<DirectedGraphNode> {
             }
 
             lastReturned.out.remove(DirectedGraphNode.this);
-            DirectedGraphNode.this.in.remove(lastReturned);
+            iterator.remove();
             lastReturned = null;
         }
     }
