@@ -144,12 +144,12 @@ public abstract class FlowFinder {
             h.put(u, 0);
             e.put(u, 0.0);
         }
-
+/*
         for (DirectedGraphNode from : network) {
             for (DirectedGraphNode to : from) {
                 f.put(from, to, 0.0);
             }
-        }
+        }*/
 
         h.put(source, network.size());
 
@@ -185,41 +185,16 @@ public abstract class FlowFinder {
         double delta = Math.min(e.get(from),
                                 residualEdgeWeight(from, to, f, c));
 
-        //f.put(from, to, f.get(from, to) + delta);
-        //f.put(to, from, f.get(to, from) - delta);
-
+        f.put(from, to, f.get(from, to) + delta);
+        f.put(to, from, f.get(to, from) - delta);
+/*
         if (from.hasChild(to)) {
             f.put(from, to, f.get(from, to) + delta);
         } else {
             f.put(to, from, f.get(to, from) - delta);
-        }
+        }*/
 
         e.put(from, e.get(from) - delta);
         e.put(to, e.get(to) + delta);
-    }
-
-    protected void discharge(DirectedGraphNode u,
-                             Map<DirectedGraphNode, N> n,
-                             Map<DirectedGraphNode, Double> e,
-                             Map<DirectedGraphNode, Integer> h,
-                             WeightFunction f,
-                             WeightFunction c) {
-        N neighborList = n.get(u);
-
-        while (e.get(u) > 0.0) {
-            DirectedGraphNode v = (neighborList.current == null ?
-                                   null :
-                                   neighborList.current.node);
-
-            if (v == null) {
-                relabel(u, h, f, c);
-                neighborList.current = neighborList.head;
-            } else if ((residualEdgeWeight(u, v, f, c) > 0.0)
-                    && (h.get(u) == h.get(v) + 1)) {
-                push(u, v, f, c, e);
-            } else {
-                neighborList.current = neighborList.current.next;
-            }
-        }
     }
 }

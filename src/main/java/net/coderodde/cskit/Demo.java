@@ -6,6 +6,21 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import net.coderodde.cskit.Utilities.Pair;
+import static net.coderodde.cskit.Utilities.Triple;
+import static net.coderodde.cskit.Utilities.allWeakEquals;
+import static net.coderodde.cskit.Utilities.debugPrintArray;
+import static net.coderodde.cskit.Utilities.epsilonEquals;
+import static net.coderodde.cskit.Utilities.generateSimpleGraph;
+import static net.coderodde.cskit.Utilities.getPathCost;
+import static net.coderodde.cskit.Utilities.getPresortedArray;
+import static net.coderodde.cskit.Utilities.getRandomGraph;
+import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
+import static net.coderodde.cskit.Utilities.isConnectedPath;
+import static net.coderodde.cskit.Utilities.isSorted;
+import static net.coderodde.cskit.Utilities.line;
+import static net.coderodde.cskit.Utilities.pathsAreSame;
+import static net.coderodde.cskit.Utilities.title;
+import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
@@ -28,26 +43,10 @@ import net.coderodde.cskit.sorting.IterativeMergeSort;
 import net.coderodde.cskit.sorting.NaturalMergeSort;
 import net.coderodde.cskit.sorting.ObjectSortingAlgorithm;
 import net.coderodde.cskit.sorting.TreeSort;
-import static net.coderodde.cskit.Utilities.Triple;
-import static net.coderodde.cskit.Utilities.allWeakEquals;
-import static net.coderodde.cskit.Utilities.debugPrintArray;
-import static net.coderodde.cskit.Utilities.epsilonEquals;
-import static net.coderodde.cskit.Utilities.generateSimpleGraph;
-import static net.coderodde.cskit.Utilities.getPathCost;
-import static net.coderodde.cskit.Utilities.getPresortedArray;
-import static net.coderodde.cskit.Utilities.getRandomGraph;
-import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
-import static net.coderodde.cskit.Utilities.isConnectedPath;
-import static net.coderodde.cskit.Utilities.isSorted;
-import static net.coderodde.cskit.Utilities.line;
-import static net.coderodde.cskit.Utilities.pathsAreSame;
-import static net.coderodde.cskit.Utilities.title;
-import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.tree.OrderStatisticTree;
 import net.coderodde.cskit.graph.flow.BidirectionalEdmondKarpFlowFinder;
 import net.coderodde.cskit.graph.flow.EdmondKarpFlowFinder;
 import net.coderodde.cskit.graph.flow.FlowFinder;
-import net.coderodde.cskit.graph.flow.RelabelToFrontFlowFinder;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -55,16 +54,16 @@ import net.coderodde.cskit.graph.flow.RelabelToFrontFlowFinder;
 public class Demo{
 
     public static void main(String... args) {
-//        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
-//                                       new CombSort<Integer>(),
-//                                       new CountingSort<Integer>(),
-//                                       new HeapSelectionSort<Integer>(),
-//                                       new IterativeMergeSort<Integer>(),
-//                                       new NaturalMergeSort<Integer>(),
-//                                       new TreeSort<Integer>());
-//        profileShortestPathAlgorithms();
-//        profileBreadthFirstSearchAlgorithms();
-//        profileOrderStatisticTree();
+        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
+                                       new CombSort<Integer>(),
+                                       new CountingSort<Integer>(),
+                                       new HeapSelectionSort<Integer>(),
+                                       new IterativeMergeSort<Integer>(),
+                                       new NaturalMergeSort<Integer>(),
+                                       new TreeSort<Integer>());
+        profileShortestPathAlgorithms();
+        profileBreadthFirstSearchAlgorithms();
+        profileOrderStatisticTree();
         profileMaxFlowAlgorithms();
 //        debugMaxFlowAlgorithms();
     }
@@ -305,6 +304,10 @@ public class Demo{
 
         ////
 
+        long SEED = System.currentTimeMillis();
+
+        System.out.println("Seed: " + SEED);
+
         int SIZE = 200000;
         Random r = new Random();
 
@@ -432,6 +435,10 @@ public class Demo{
         final float LOAD_FACTOR = 10.0f / N;
 
         title("General shortest path algorithms with " + N + " nodes");
+
+        final long SEED = System.currentTimeMillis();
+
+        System.out.println("Seed: " + SEED);
 
         Random r = new Random();
         Triple<List<DirectedGraphNode>,
@@ -583,19 +590,12 @@ public class Demo{
                                                              c);
 
         System.out.println("BidirectionalEdmonFlowFinder: " + pair2.second);
-
-        Pair<WeightFunction, Double> pair3 =
-                new RelabelToFrontFlowFinder().find(Vancouver,
-                                                        Winnipeg,
-                                                        c);
-
-        System.out.println("RelabelToFrontFlowFinder: " + pair3.second);
     }
 
     private static void profileMaxFlowAlgorithms() {
-        final int N = 1000;
+        final int N = 5000;
         final float ELF = 5.0f / N;
-        final long SEED = 1388054822944L; //System.currentTimeMillis();
+        final long SEED = System.currentTimeMillis();
 
         title("Max-flow algorithm demo");
         System.out.println("Seed: " + SEED);
@@ -613,7 +613,6 @@ public class Demo{
 
         System.out.println("Source: " + source.toString());
         System.out.println("Sink:   " + sink.toString());
-
         long ta = System.currentTimeMillis();
 
         Pair<WeightFunction, Double> result1 =
@@ -638,21 +637,11 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        Pair<WeightFunction, Double> result3 =
-                new RelabelToFrontFlowFinder()
-                .find(source, sink, pair.second);
-
-        tb = System.currentTimeMillis();
-
-        System.out.println("RelabelToFrontFlowFinder in " + (tb - ta)
-                + " ms, |f| = " + result3.second);
-
         line();
 
         System.out.println(
                 "Flows equal: " + epsilonEquals(0.001,
                                                 result1.second,
-                                                result2.second,
-                                                result3.second));
+                                                result2.second));
     }
 }
