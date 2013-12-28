@@ -22,6 +22,7 @@ import static net.coderodde.cskit.Utilities.pathsAreSame;
 import static net.coderodde.cskit.Utilities.title;
 import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
+import net.coderodde.cskit.ds.pq.FibonacciHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
 import net.coderodde.cskit.graph.WeightFunction;
@@ -66,6 +67,7 @@ public class Demo{
         profileOrderStatisticTree();
         profileMaxFlowAlgorithms();
 //        debugMaxFlowAlgorithms();
+//        profileFibonacciHeap();
     }
 
     public static void profileOrderStatisticTree() {
@@ -430,29 +432,57 @@ public class Demo{
         System.out.println();
     }
 
-    private static void profileShortestPathAlgorithms() {
-        final int N = 2000;
-        final float LOAD_FACTOR = 10.0f / N;
+    private static void profileFibonacciHeap() {
+        FibonacciHeap<Integer, Integer> heap =
+                new FibonacciHeap<Integer, Integer>();
 
-        title("General shortest path algorithms with " + N + " nodes");
+        for (int i = 10; i > 0; --i) {
+            heap.insert(i, i);
+        }
 
-        final long SEED = System.currentTimeMillis();
+        while(heap.isEmpty() == false) {
+            System.out.println("Removing: " + heap.min());
+            heap.extractMinimum();
+        }
 
-        System.out.println("Seed: " + SEED);
+        System.out.println();
 
-        Random r = new Random();
+        heap.clear();
+        line();
+
+        for (int i = 10; i > 0; --i) {
+            heap.insert(i, i);
+        }
+
+        heap.decreasePriority(10, 0);
+
+        while(heap.isEmpty() == false) {
+            System.out.print(heap.extractMinimum() + " ");
+        }
+
+        System.out.println();
+    }
+
+    private static void profileShortestPathAlgorithmsOn(
+            PriorityQueue<DirectedGraphNode, Double> pq,
+            int size,
+            long seed,
+            float lf) {
+        title2("General shortest path algorithms with " + pq.getClass().getName());
+
+        Random r = new Random(seed);
         Triple<List<DirectedGraphNode>,
                WeightFunction,
-               CoordinateMap> triple = getRandomGraph(N, LOAD_FACTOR, r, new EuclidianMetric(null, null));
+               CoordinateMap> triple =
+                getRandomGraph(size, lf, r, new EuclidianMetric(null, null));
 
-        DirectedGraphNode source = triple.first.get(r.nextInt(N));
-        DirectedGraphNode target = triple.first.get(r.nextInt(N));
+        DirectedGraphNode source = triple.first.get(r.nextInt(size));
+        DirectedGraphNode target = triple.first.get(r.nextInt(size));
 
         System.out.println("Source: " + source.toString());
         System.out.println("Target: " + target.toString());
 
-        PriorityQueue<DirectedGraphNode, Double> OPEN =
-                new BinaryHeap<DirectedGraphNode, Double>(N);
+        PriorityQueue<DirectedGraphNode, Double> OPEN = pq.newInstance();
 
         GeneralPathFinder finder1 = new DijkstraFinder(OPEN);
 
@@ -467,7 +497,7 @@ public class Demo{
                 + "path connected: " + isConnectedPath(path1)
                 + ", cost: " + getPathCost(path1, triple.second));
 
-        OPEN = new BinaryHeap<DirectedGraphNode, Double>(N);
+        OPEN = pq.newInstance();
 
         GeneralPathFinder finder2 =
                 new AStarFinder(OPEN,
@@ -486,7 +516,7 @@ public class Demo{
                 + "path connected: " + isConnectedPath(path2)
                 + ", cost: " + getPathCost(path2, triple.second));
 
-        OPEN = new BinaryHeap<DirectedGraphNode, Double>(N);
+        OPEN = pq.newInstance();
 
         GeneralPathFinder finder3 =
                 new BidirectionalDijkstraFinder(OPEN);
@@ -502,7 +532,36 @@ public class Demo{
                 + " ms, " + "path connected: " + isConnectedPath(path3)
                 + ", cost: " + getPathCost(path3, triple.second));
 
+        line();
+
         System.out.println("Path are same: " + pathsAreSame(path1, path2, path3));
+
+        line();
+    }
+
+    private static void profileShortestPathAlgorithms() {
+        final int N = 2000;
+        final float LOAD_FACTOR = 10.0f / N;
+        title("General shortest path algoirhtms with " + N + " nodes");
+
+        PriorityQueue<DirectedGraphNode, Double> pq =
+                new BinaryHeap<DirectedGraphNode, Double>();
+
+        final long SEED = System.currentTimeMillis();
+
+        System.out.println("Seed: " + SEED);
+
+        profileShortestPathAlgorithmsOn(
+                new BinaryHeap<DirectedGraphNode, Double>(),
+                N,
+                SEED,
+                LOAD_FACTOR);
+
+        profileShortestPathAlgorithmsOn(
+                new FibonacciHeap<DirectedGraphNode, Double>(),
+                N,
+                SEED,
+                LOAD_FACTOR);
     }
 
     private static void debugHeapSelectionSort() {
