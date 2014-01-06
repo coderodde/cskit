@@ -66,6 +66,14 @@ public interface PriorityQueue<E, W extends Comparable<? super W>> {
     public boolean contains(E element);
 
     /**
+     * Returns the current priority of an element.
+     *
+     * @param element the element to query.
+     * @return the priority of an element.
+     */
+    public W getPriority(E element);
+
+    /**
      * Spawns another empty queue.
      */
     public PriorityQueue<E, W> newInstance();

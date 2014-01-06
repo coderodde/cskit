@@ -8,7 +8,7 @@ import java.util.Set;
 import static net.coderodde.cskit.Utilities.tracebackPathBidirectional;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This class implements bidirectional Dijkstra's algorithm.
@@ -37,7 +37,7 @@ public class BidirectionalDijkstraFinder extends GeneralPathFinder {
     @Override
     public List<DirectedGraphNode> find(DirectedGraphNode source,
                                         DirectedGraphNode target,
-                                        WeightFunction w) {
+                                        DirectedGraphWeightFunction w) {
 
         PriorityQueue<DirectedGraphNode, Double> OPENA    = OPEN;
         Set<DirectedGraphNode> CLOSEDA                    = CLOSED;

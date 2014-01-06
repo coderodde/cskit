@@ -48,6 +48,9 @@ implements PriorityQueue<E, W>{
         this(DEFAULT_MAP_CAPACITY);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void insert(E e, W priority) {
         checkNotNull(e, "Null elements not allowed in this Fibonacci heap");
@@ -70,6 +73,9 @@ implements PriorityQueue<E, W>{
         map.put(e, node);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void decreasePriority(E e, W newPriority) {
         Node<E, W> x = map.get(e);
@@ -99,16 +105,25 @@ implements PriorityQueue<E, W>{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEmpty() {
         return size == 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public E min() {
         if (size == 0) {
@@ -121,6 +136,9 @@ implements PriorityQueue<E, W>{
         return minimumNode.datum;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public E extractMinimum() {
         if (isEmpty()) {
@@ -169,6 +187,9 @@ implements PriorityQueue<E, W>{
         return z.datum;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void clear() {
         minimumNode = null;
@@ -176,14 +197,32 @@ implements PriorityQueue<E, W>{
         size = 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean contains(E element) {
         return map.containsKey(element);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PriorityQueue<E, W> newInstance() {
         return new FibonacciHeap<E, W>(this.map.size());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public W getPriority(E element) {
+        if (map.containsKey(element) == false) {
+            return null;
+        }
+
+        return map.get(element).priority;
     }
 
     private void consolidate() {

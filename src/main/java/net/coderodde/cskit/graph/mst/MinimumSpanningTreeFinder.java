@@ -2,8 +2,10 @@ package net.coderodde.cskit.graph.mst;
 
 import java.util.List;
 import net.coderodde.cskit.Utilities.Pair;
-import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.UndirectedGraphEdge;
+import net.coderodde.cskit.graph.UndirectedGraphNode;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
+import net.coderodde.cskit.graph.UndirectedGraphWeightFunction;
 
 /**
  * This abstract class defines the API for minimum-spanning-    tree algorithms.
@@ -13,7 +15,7 @@ import net.coderodde.cskit.graph.WeightFunction;
  */
 public abstract class MinimumSpanningTreeFinder {
 
-    public abstract Pair<List<DirectedGraphNode>, Double>
-            find(List<DirectedGraphNode> graph,
-                 WeightFunction w);
+    public abstract Pair<List<UndirectedGraphEdge>, Double>
+            find(List<UndirectedGraphNode> graph,
+                 UndirectedGraphWeightFunction w);
 }

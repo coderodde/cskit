@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This abstract class defines the API for maximum-flow algorithms.
@@ -16,12 +16,12 @@ import net.coderodde.cskit.graph.WeightFunction;
  */
 public abstract class FlowFinder {
 
-    public abstract Pair<WeightFunction, Double> find(DirectedGraphNode source,
+    public abstract Pair<DirectedGraphWeightFunction, Double> find(DirectedGraphNode source,
                                                       DirectedGraphNode sink,
-                                                      WeightFunction w);
+                                                      DirectedGraphWeightFunction w);
 
     public static final void resolveParallelEdges(
-            List<DirectedGraphNode> graph, WeightFunction w) {
+            List<DirectedGraphNode> graph, DirectedGraphWeightFunction w) {
         List<DirectedGraphNode> toAdd = new ArrayList<DirectedGraphNode>();
         int index = 0;
 
@@ -56,7 +56,7 @@ public abstract class FlowFinder {
     }
 
     public static final DirectedGraphNode
-            createSuperSource(WeightFunction w,
+            createSuperSource(DirectedGraphWeightFunction w,
                               DirectedGraphNode... sources) {
         DirectedGraphNode superSource = new DirectedGraphNode("Super source");
 
@@ -69,7 +69,7 @@ public abstract class FlowFinder {
     }
 
     public static final DirectedGraphNode
-            createSuperSink(WeightFunction w,
+            createSuperSink(DirectedGraphWeightFunction w,
                             DirectedGraphNode... sinks) {
         DirectedGraphNode superSink = new DirectedGraphNode("Super sink");
 
@@ -102,8 +102,8 @@ public abstract class FlowFinder {
     }
 
     protected double findMinimumEdgeAndRemove(List<DirectedGraphNode> path,
-                                            WeightFunction c,
-                                            WeightFunction f) {
+                                            DirectedGraphWeightFunction c,
+                                            DirectedGraphWeightFunction f) {
         double min = Double.POSITIVE_INFINITY;
 
         for (int i = 0; i < path.size() - 1; ++i) {
@@ -123,8 +123,8 @@ public abstract class FlowFinder {
 
     protected double residualEdgeWeight(DirectedGraphNode from,
                                         DirectedGraphNode to,
-                                        WeightFunction f,
-                                        WeightFunction c) {
+                                        DirectedGraphWeightFunction f,
+                                        DirectedGraphWeightFunction c) {
         if (from.hasChild(to)) {
             return c.get(from, to) - f.get(from, to);
         } else if (to.hasChild(from)) {
@@ -138,8 +138,8 @@ public abstract class FlowFinder {
                                      DirectedGraphNode source,
                                      Map<DirectedGraphNode, Integer> h,
                                      Map<DirectedGraphNode, Double> e,
-                                     WeightFunction f,
-                                     WeightFunction c) {
+                                     DirectedGraphWeightFunction f,
+                                     DirectedGraphWeightFunction c) {
         for (DirectedGraphNode u : network) {
             h.put(u, 0);
             e.put(u, 0.0);
@@ -162,8 +162,8 @@ public abstract class FlowFinder {
 
     protected void relabel(DirectedGraphNode u,
                            Map<DirectedGraphNode, Integer> h,
-                           WeightFunction f,
-                           WeightFunction c) {
+                           DirectedGraphWeightFunction f,
+                           DirectedGraphWeightFunction c) {
         int minh = Integer.MAX_VALUE;
 
         for (DirectedGraphNode v : u.allIterable()) {
@@ -179,8 +179,8 @@ public abstract class FlowFinder {
 
     protected void push(DirectedGraphNode from,
                         DirectedGraphNode to,
-                        WeightFunction f,
-                        WeightFunction c,
+                        DirectedGraphWeightFunction f,
+                        DirectedGraphWeightFunction c,
                         Map<DirectedGraphNode, Double> e) {
         double delta = Math.min(e.get(from),
                                 residualEdgeWeight(from, to, f, c));

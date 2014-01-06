@@ -12,7 +12,7 @@ import net.coderodde.cskit.Utilities.Pair;
 import static net.coderodde.cskit.Utilities.findTouchNode;
 import static net.coderodde.cskit.Utilities.tracebackPathBidirectional;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This class implements the Edmond-Karp maximum-flow algorithm.
@@ -41,11 +41,11 @@ public class BidirectionalEdmondKarpFlowFinder extends FlowFinder {
           new HashSet<DirectedGraphNode>();
 
     @Override
-    public Pair<WeightFunction, Double> find(DirectedGraphNode source,
+    public Pair<DirectedGraphWeightFunction, Double> find(DirectedGraphNode source,
                                              DirectedGraphNode sink,
-                                             WeightFunction c) {
+                                             DirectedGraphWeightFunction c) {
         double flow = 0.0;
-        WeightFunction f = new WeightFunction(); // The flow map.
+        DirectedGraphWeightFunction f = new DirectedGraphWeightFunction(); // The flow map.
         List<DirectedGraphNode> path = null;
 
         while ((path = findAugmentingPath(source, sink, c, f)).size() > 1) {
@@ -53,7 +53,7 @@ public class BidirectionalEdmondKarpFlowFinder extends FlowFinder {
             flow += df;
         }
 
-        return new Pair<WeightFunction, Double>(f, flow);
+        return new Pair<DirectedGraphWeightFunction, Double>(f, flow);
     }
 
     /**
@@ -69,8 +69,8 @@ public class BidirectionalEdmondKarpFlowFinder extends FlowFinder {
      */
     private List<DirectedGraphNode> findAugmentingPath(DirectedGraphNode source,
                                                        DirectedGraphNode sink,
-                                                       WeightFunction c,
-                                                       WeightFunction f) {
+                                                       DirectedGraphWeightFunction c,
+                                                       DirectedGraphWeightFunction f) {
         Deque<DirectedGraphNode> queueA = new LinkedList<DirectedGraphNode>();
         Deque<DirectedGraphNode> queueB = new LinkedList<DirectedGraphNode>();
 

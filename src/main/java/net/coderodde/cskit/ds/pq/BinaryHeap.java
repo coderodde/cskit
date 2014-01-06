@@ -203,6 +203,15 @@ implements PriorityQueue<E, W> {
         return map.containsKey(element);
     }
 
+    @Override
+    public W getPriority(E element) {
+        if (map.containsKey(element) == false) {
+            return null;
+        }
+
+        return map.get(element).priority;
+    }
+
     private int checkCapacity(int capacity) {
         return capacity < 16 ? 16 : capacity;
     }

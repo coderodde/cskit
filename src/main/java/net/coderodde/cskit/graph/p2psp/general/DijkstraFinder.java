@@ -4,7 +4,7 @@ import java.util.List;
 import static net.coderodde.cskit.Utilities.tracebackPath;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This class implements the classical Dijkstra's algorithm for finding point-
@@ -22,7 +22,7 @@ public class DijkstraFinder extends GeneralPathFinder {
     @Override
     public List<DirectedGraphNode> find(DirectedGraphNode source,
                                         DirectedGraphNode target,
-                                        WeightFunction w) {
+                                        DirectedGraphWeightFunction w) {
         OPEN.clear();
         CLOSED.clear();
         GSCORE_MAP.clear();

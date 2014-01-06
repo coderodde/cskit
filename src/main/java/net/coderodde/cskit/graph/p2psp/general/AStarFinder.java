@@ -4,7 +4,7 @@ import java.util.List;
 import static net.coderodde.cskit.Utilities.tracebackPath;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This class implements <tt>A*</tt>-search algorithm.
@@ -25,7 +25,7 @@ public class AStarFinder extends GeneralPathFinder {
     @Override
     public List<DirectedGraphNode> find(DirectedGraphNode source,
                                         DirectedGraphNode target,
-                                        WeightFunction w) {
+                                        DirectedGraphWeightFunction w) {
         h.setTarget(target);
         OPEN.clear();
         CLOSED.clear();

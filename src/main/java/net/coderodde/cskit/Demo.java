@@ -25,7 +25,7 @@ import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.FibonacciHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 import net.coderodde.cskit.graph.p2psp.general.AStarFinder;
 import net.coderodde.cskit.graph.p2psp.general.BidirectionalDijkstraFinder;
 import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
@@ -45,9 +45,15 @@ import net.coderodde.cskit.sorting.NaturalMergeSort;
 import net.coderodde.cskit.sorting.ObjectSortingAlgorithm;
 import net.coderodde.cskit.sorting.TreeSort;
 import net.coderodde.cskit.ds.tree.OrderStatisticTree;
+import net.coderodde.cskit.graph.UndirectedGraphEdge;
+import net.coderodde.cskit.graph.UndirectedGraphNode;
+import net.coderodde.cskit.graph.UndirectedGraphWeightFunction;
 import net.coderodde.cskit.graph.flow.BidirectionalEdmondKarpFlowFinder;
 import net.coderodde.cskit.graph.flow.EdmondKarpFlowFinder;
 import net.coderodde.cskit.graph.flow.FlowFinder;
+import net.coderodde.cskit.graph.mst.KruskalMSTFinder;
+import net.coderodde.cskit.graph.mst.MinimumSpanningTreeFinder;
+import net.coderodde.cskit.graph.mst.PrimMSTFinder;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -55,17 +61,18 @@ import net.coderodde.cskit.graph.flow.FlowFinder;
 public class Demo{
 
     public static void main(String... args) {
-        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
-                                       new CombSort<Integer>(),
-                                       new CountingSort<Integer>(),
-                                       new HeapSelectionSort<Integer>(),
-                                       new IterativeMergeSort<Integer>(),
-                                       new NaturalMergeSort<Integer>(),
-                                       new TreeSort<Integer>());
-        profileShortestPathAlgorithms();
-        profileBreadthFirstSearchAlgorithms();
-        profileOrderStatisticTree();
-        profileMaxFlowAlgorithms();
+//        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
+//                                       new CombSort<Integer>(),
+//                                       new CountingSort<Integer>(),
+//                                       new HeapSelectionSort<Integer>(),
+//                                       new IterativeMergeSort<Integer>(),
+//                                       new NaturalMergeSort<Integer>(),
+//                                       new TreeSort<Integer>());
+//        profileShortestPathAlgorithms();
+//        profileBreadthFirstSearchAlgorithms();
+//        profileOrderStatisticTree();
+//        profileMaxFlowAlgorithms();
+        profileMSTAlgorithms();
 //        debugMaxFlowAlgorithms();
 //        profileFibonacciHeap();
     }
@@ -472,7 +479,7 @@ public class Demo{
 
         Random r = new Random(seed);
         Triple<List<DirectedGraphNode>,
-               WeightFunction,
+               DirectedGraphWeightFunction,
                CoordinateMap> triple =
                 getRandomGraph(size, lf, r, new EuclidianMetric(null, null));
 
@@ -606,7 +613,7 @@ public class Demo{
         DirectedGraphNode Regina = new DirectedGraphNode("Regina");
         DirectedGraphNode Winnipeg = new DirectedGraphNode("Winnipeg");
 
-        WeightFunction c = new WeightFunction();
+        DirectedGraphWeightFunction c = new DirectedGraphWeightFunction();
 
         /// 1 - 3
         Vancouver.addChild(Edmonton);
@@ -638,12 +645,12 @@ public class Demo{
         Regina.addChild(Winnipeg);
         c.put(Regina, Winnipeg, 4.0);
 
-        Pair<WeightFunction, Double> pair =
+        Pair<DirectedGraphWeightFunction, Double> pair =
                 new EdmondKarpFlowFinder().find(Vancouver, Winnipeg, c);
 
         System.out.println("EdmondKarpFlowFinder: " + pair.second);
 
-        Pair<WeightFunction, Double> pair2 =
+        Pair<DirectedGraphWeightFunction, Double> pair2 =
                 new BidirectionalEdmondKarpFlowFinder().find(Vancouver,
                                                              Winnipeg,
                                                              c);
@@ -661,7 +668,7 @@ public class Demo{
 
         Random r = new Random(SEED);
 
-        Pair<List<DirectedGraphNode>, WeightFunction> pair =
+        Pair<List<DirectedGraphNode>, DirectedGraphWeightFunction> pair =
                 Utilities.getRandomFlowNetwork(N, ELF, r, 10.0);
 
         FlowFinder.resolveParallelEdges(pair.first, pair.second);
@@ -674,7 +681,7 @@ public class Demo{
         System.out.println("Sink:   " + sink.toString());
         long ta = System.currentTimeMillis();
 
-        Pair<WeightFunction, Double> result1 =
+        Pair<DirectedGraphWeightFunction, Double> result1 =
                 new EdmondKarpFlowFinder()
                 .find(source, sink, pair.second);
 
@@ -685,7 +692,7 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        Pair<WeightFunction, Double> result2 =
+        Pair<DirectedGraphWeightFunction, Double> result2 =
                 new BidirectionalEdmondKarpFlowFinder()
                 .find(source, sink, pair.second);
 
@@ -702,5 +709,45 @@ public class Demo{
                 "Flows equal: " + epsilonEquals(0.001,
                                                 result1.second,
                                                 result2.second));
+    }
+
+    private static void profileMSTAlgorithms() {
+        final int N = 50;
+        final float ELF = 5.0f / N;
+        final long SEED = System.currentTimeMillis();
+
+        title("Minimum-spanning-tree algorithm demo");
+        System.out.println("Seed: " + SEED);
+
+        Random r = new Random(SEED);
+
+        Pair<List<UndirectedGraphNode>, UndirectedGraphWeightFunction> pair =
+                Utilities.getRandomUndirectedGraph(N, ELF, r, 10.0);
+
+        MinimumSpanningTreeFinder finder1 =
+                new KruskalMSTFinder();
+
+        long ta = System.currentTimeMillis();
+
+        Pair<List<UndirectedGraphEdge>, Double> result1 =
+                finder1.find(pair.first, pair.second);
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("Kruskal in " + (tb - ta) + " ms, " +
+                "cost: " + result1.second);
+
+        MinimumSpanningTreeFinder finder =
+                new PrimMSTFinder();
+
+        ta = System.currentTimeMillis();
+
+        Pair<List<UndirectedGraphEdge>, Double> result2 =
+                finder1.find(pair.first, pair.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("Prim in " + (tb - ta) + " ms, " +
+                "cost: " + result2.second);
     }
 }

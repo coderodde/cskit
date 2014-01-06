@@ -8,7 +8,7 @@ import java.util.Map;
  * @author Rodion Efremov
  * @version 1.6 (7.12.2013)
  */
-public class WeightFunction {
+public class DirectedGraphWeightFunction {
 
     private Map<DirectedGraphNode, Map<DirectedGraphNode, Double>> map =
     new HashMap<DirectedGraphNode, Map<DirectedGraphNode, Double>>();

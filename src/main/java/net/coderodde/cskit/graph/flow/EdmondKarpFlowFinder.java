@@ -10,7 +10,7 @@ import java.util.Set;
 import net.coderodde.cskit.Utilities;
 import net.coderodde.cskit.Utilities.Pair;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This class implements the Edmond-Karp maximum-flow algorithm.
@@ -21,11 +21,11 @@ import net.coderodde.cskit.graph.WeightFunction;
 public class EdmondKarpFlowFinder extends FlowFinder {
 
     @Override
-    public Pair<WeightFunction, Double> find(DirectedGraphNode source,
+    public Pair<DirectedGraphWeightFunction, Double> find(DirectedGraphNode source,
                                              DirectedGraphNode sink,
-                                             WeightFunction c) {
+                                             DirectedGraphWeightFunction c) {
         double flow = 0.0;
-        WeightFunction f = new WeightFunction(); // The flow map.
+        DirectedGraphWeightFunction f = new DirectedGraphWeightFunction(); // The flow map.
         List<DirectedGraphNode> path = null;
 
         while ((path = findAugmentingPath(source, sink, c, f)).size() > 1) {
@@ -33,7 +33,7 @@ public class EdmondKarpFlowFinder extends FlowFinder {
             flow += df;
         }
 
-        return new Pair<WeightFunction, Double>(f, flow);
+        return new Pair<DirectedGraphWeightFunction, Double>(f, flow);
     }
 
     /**
@@ -48,8 +48,8 @@ public class EdmondKarpFlowFinder extends FlowFinder {
      */
     private List<DirectedGraphNode> findAugmentingPath(DirectedGraphNode source,
                                                        DirectedGraphNode sink,
-                                                       WeightFunction c,
-                                                       WeightFunction f) {
+                                                       DirectedGraphWeightFunction c,
+                                                       DirectedGraphWeightFunction f) {
         Deque<DirectedGraphNode> queue = new LinkedList<DirectedGraphNode>();
         Map<DirectedGraphNode, DirectedGraphNode> parentMap =
                    new HashMap<DirectedGraphNode, DirectedGraphNode>();

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
  * This interface defines the common API for general shortest path algorithms.
@@ -32,5 +32,5 @@ public abstract class GeneralPathFinder {
 
     public abstract List<DirectedGraphNode> find(DirectedGraphNode source,
                                                  DirectedGraphNode target,
-                                                 WeightFunction w);
+                                                 DirectedGraphWeightFunction w);
 }

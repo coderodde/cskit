@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import net.coderodde.cskit.graph.DirectedGraphNode;
-import net.coderodde.cskit.graph.WeightFunction;
+import net.coderodde.cskit.graph.UndirectedGraphEdge;
+import net.coderodde.cskit.graph.UndirectedGraphNode;
+import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
+import net.coderodde.cskit.graph.UndirectedGraphWeightFunction;
 import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
 import net.coderodde.cskit.graph.p2psp.general.HeuristicFunction;
 import net.coderodde.cskit.sorting.Range;
@@ -71,7 +74,7 @@ public class Utilities {
     }
 
     public static double getPathCost(List<DirectedGraphNode> path,
-                                     WeightFunction w) {
+                                     DirectedGraphWeightFunction w) {
         double cost = 0;
 
         for (int i = 0; i < path.size() - 1; ++i) {
@@ -250,10 +253,10 @@ public class Utilities {
         return graph;
     }
 
-    public static final Pair<List<DirectedGraphNode>, WeightFunction>
+    public static final Pair<List<DirectedGraphNode>, DirectedGraphWeightFunction>
             getWeightedGraph(int size, float elf, Random r) {
         List<DirectedGraphNode> graph = new ArrayList<DirectedGraphNode>(size);
-        WeightFunction w = new WeightFunction();
+        DirectedGraphWeightFunction w = new DirectedGraphWeightFunction();
 
         for (int i = 0; i < size; ++i) {
             graph.add(new DirectedGraphNode("" + i));
@@ -276,7 +279,7 @@ public class Utilities {
         graph.get(graph.size() - 1).addChild(graph.get(0));
         w.put(graph.get(graph.size() - 1), graph.get(0), 1.0 * r.nextDouble());
 
-        return new Pair<List<DirectedGraphNode>, WeightFunction>
+        return new Pair<List<DirectedGraphNode>, DirectedGraphWeightFunction>
                    (graph, w);
     }
 
@@ -335,13 +338,56 @@ public class Utilities {
         return residualGraph;
     }
 
-    public static final Pair<List<DirectedGraphNode>, WeightFunction>
+    public static final Pair<List<UndirectedGraphNode>,
+                             UndirectedGraphWeightFunction>
+            getRandomUndirectedGraph(int size,
+                                     float elf,
+                                     Random r,
+                                     double maxWeight) {
+        List<UndirectedGraphNode> graph =
+                new ArrayList<UndirectedGraphNode>(size);
+        UndirectedGraphWeightFunction c = new UndirectedGraphWeightFunction();
+
+        for (int i = 0; i < size; ++i) {
+            graph.add(new UndirectedGraphNode("" + i));
+        }
+
+        for (int i = 1; i < size; ++i) {
+            for (int j = 0; j < i; ++j) {
+                if (r.nextFloat() < elf) {
+                    UndirectedGraphNode a = graph.get(i);
+                    UndirectedGraphNode b = graph.get(j);
+                    double w = maxWeight * r.nextDouble();
+                    a.connect(b);
+                    c.put(a, b, w);
+                }
+            }
+        }
+
+        for (int i = 0; i < size - 1; ++i) {
+            UndirectedGraphNode a = graph.get(i);
+            UndirectedGraphNode b = graph.get(i + 1);
+            double w = maxWeight * r.nextDouble();
+            a.connect(b);
+            c.put(a, b, w);
+        }
+
+        graph.get(graph.size() - 1).connect(graph.get(0));
+        c.put(graph.get(graph.size() - 1),
+              graph.get(0),
+              maxWeight * r.nextDouble());
+
+        return new Pair<List<UndirectedGraphNode>,
+                        UndirectedGraphWeightFunction>(graph, c);
+    }
+
+    public static final Pair<List<DirectedGraphNode>, DirectedGraphWeightFunction>
             getRandomFlowNetwork(int size,
                                  float elf,
                                  Random r,
                                  double maxCapacity) {
         List<DirectedGraphNode> graph = new ArrayList<DirectedGraphNode>(size);
-        WeightFunction c = new WeightFunction();
+        DirectedGraphWeightFunction c = new DirectedGraphWeightFunction();
 
         for (int i = 0; i < size; ++i) {
             graph.add(new DirectedGraphNode("" + i));
@@ -372,7 +418,7 @@ public class Utilities {
               graph.get(0),
               maxCapacity * r.nextDouble());
 
-        return new Pair<List<DirectedGraphNode>, WeightFunction>(
+        return new Pair<List<DirectedGraphNode>, DirectedGraphWeightFunction>(
                 graph,
                 c);
     }
@@ -398,7 +444,7 @@ public class Utilities {
      * @return the graph structures.
      */
     public static final Triple<List<DirectedGraphNode>,
-                               WeightFunction,
+                               DirectedGraphWeightFunction,
                                CoordinateMap> getRandomGraph(
                                     int size,
                                     float elf,
@@ -406,7 +452,7 @@ public class Utilities {
                                     HeuristicFunction f) {
         ArrayList<DirectedGraphNode> graph =
                 new ArrayList<DirectedGraphNode>(size);
-        WeightFunction w = new WeightFunction();
+        DirectedGraphWeightFunction w = new DirectedGraphWeightFunction();
         CoordinateMap m = new CoordinateMap(4, size);
 
         for (int i = 0; i < size; ++i) {
@@ -442,7 +488,7 @@ public class Utilities {
                           m.get(graph.get(0))));
 
         return new Triple<List<DirectedGraphNode>,
-                          WeightFunction,
+                          DirectedGraphWeightFunction,
                           CoordinateMap>(graph, w, m);
 
     }
@@ -617,6 +663,64 @@ public class Utilities {
             array[j] = array[k];
             array[k] = tmp;
         }
+    }
+
+    public static final
+            Pair<Set<UndirectedGraphNode>,
+                 List<UndirectedGraphEdge>>
+                              expandGraphAndGetEdges(UndirectedGraphNode u) {
+        Deque<UndirectedGraphNode> queue =
+                new LinkedList<UndirectedGraphNode>();
+
+        Set<UndirectedGraphNode> visited =
+                new HashSet<UndirectedGraphNode>();
+
+        List<UndirectedGraphEdge> edges =
+                new ArrayList<UndirectedGraphEdge>();
+
+        queue.add(u);
+        visited.add(u);
+
+        while (queue.isEmpty() == false) {
+            UndirectedGraphNode current = queue.removeFirst();
+
+            for (UndirectedGraphNode v : current) {
+                if (visited.contains(v)) {
+                    visited.add(v);
+                    queue.addLast(v);
+                    edges.add(new UndirectedGraphEdge(v, current));
+                }
+            }
+        }
+
+        return new Pair<Set<UndirectedGraphNode>,
+                        List<UndirectedGraphEdge>>(visited, edges);
+    }
+
+    public static final Set<UndirectedGraphNode>
+            expandGraph(List<UndirectedGraphNode> list) {
+        Deque<UndirectedGraphNode> queue =
+                new LinkedList<UndirectedGraphNode>();
+        Set<UndirectedGraphNode> visited =
+                new HashSet<UndirectedGraphNode>();
+
+        for (UndirectedGraphNode u : list) {
+            queue.add(u);
+            visited.add(u);
+        }
+
+        while (queue.isEmpty() == false) {
+            UndirectedGraphNode current = queue.removeFirst();
+
+            for (UndirectedGraphNode v : current) {
+                if (visited.contains(v) == false) {
+                    visited.add(v);
+                    queue.addLast(v);
+                }
+            }
+        }
+
+        return visited;
     }
 
     public static final Set<DirectedGraphNode>
