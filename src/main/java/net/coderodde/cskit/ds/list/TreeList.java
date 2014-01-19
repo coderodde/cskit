@@ -1,4 +1,4 @@
-package net.coderodde.ds.list;
+package net.coderodde.cskit.ds.list;
 
 import java.io.Serializable;
 import java.util.AbstractList;

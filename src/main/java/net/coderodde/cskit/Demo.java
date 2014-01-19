@@ -58,7 +58,7 @@ import net.coderodde.cskit.graph.mst.KruskalMSTFinder;
 import net.coderodde.cskit.graph.mst.MinimumSpanningTreeFinder;
 import net.coderodde.cskit.graph.mst.PrimMSTFinder;
 import net.coderodde.cskit.sorting.HeapSort;
-import net.coderodde.ds.list.TreeList;
+import net.coderodde.cskit.ds.list.TreeList;
 
 /**
  * Hello from cskit. This is a performance demo.
