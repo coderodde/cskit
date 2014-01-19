@@ -1,7 +1,7 @@
 package net.coderodde.cskit.sorting;
 
 /**
- * Defines the comb sort algorithm. This one is an unstable sort.
+ * Implements the comb sort algorithm. This one is an unstable sort.
  *
  * @author Rodion Efremov
  * @version 1.618 (8.12.2013)

@@ -44,16 +44,27 @@ public class KruskalMSTFinder extends MinimumSpanningTreeFinder {
             return null;
         }
 
+        DisjointSet<UndirectedGraphNode> ds =
+                new DisjointSet<UndirectedGraphNode>();
+
         List<UndirectedGraphEdge> mst =
                 new ArrayList<UndirectedGraphEdge>(set.size() - 1);
 
+        Set<UndirectedGraphNode> CLOSED =
+                new HashSet<UndirectedGraphNode>(graph.size());
+
         for (UndirectedGraphEdge e : edgeList) {
-           if (map.get(e.getA()).find(e.getA())
-                   .equals(map.get(e.getB()).find(e.getB())) == false) {
-               mst.add(e);
-               map.get(e.getA()).union(e.getA(), e.getB(), map.get(e.getB()));
-               weight += w.get(e.getA(), e.getB());
-           }
+            if (CLOSED.size() >= set.size()) {
+                break;
+            }
+
+            if (ds.find(e.getA()).equals(ds.find(e.getB())) == false) {
+                ds.union(e.getA(), e.getB());
+                mst.add(e);
+                weight += e.getWeight();
+                CLOSED.add(e.getA());
+                CLOSED.add(e.getB());
+            }
         }
 
         return new Pair<List<UndirectedGraphEdge>, Double>(mst, weight);
@@ -75,18 +86,21 @@ public class KruskalMSTFinder extends MinimumSpanningTreeFinder {
         set.addAll(expandGraph(graph));
 
         for (UndirectedGraphNode u : set) {
-            map.put(u, new DisjointSet<UndirectedGraphNode>(u));
+            map.put(u, new DisjointSet<UndirectedGraphNode>());
         }
 
         List<UndirectedGraphEdge> edgeList =
                 new ArrayList<UndirectedGraphEdge>();
+
         Set<UndirectedGraphEdge> edgeSet =
                 new HashSet<UndirectedGraphEdge>();
 
         for (UndirectedGraphNode u : set) {
             for (UndirectedGraphNode v : u) {
                 UndirectedGraphEdge edge = new UndirectedGraphEdge(u, v);
+
                 if (edgeSet.contains(edge) == false) {
+                    edge.setWeight(w.get(u, v));
                     edgeSet.add(edge);
                     edgeList.add(edge);
                 }

@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class DisjointSet<E> {
 
-    public   static class Node<E> {
+    public static class Node<E> {
         E datum;
         Node<E> parent;
         int rank;
@@ -24,13 +24,20 @@ public class DisjointSet<E> {
 
     private Map<E, Node<E>> map = new HashMap<E, Node<E>>();
 
-    public DisjointSet(E rootElement) {
-        this.map.put(rootElement, new Node<E>(rootElement));
+    public E find(E e) {
+        Node<E> node = find(getNode(e));
+
+        if (node == node.parent) {
+            return node.datum;
+        }
+
+        node.parent = find(node.parent);
+        return node.parent.datum;
     }
 
-    public void union(E e1, E e2, DisjointSet<E> other) {
-        Node<E> n1 = map.get(e1);
-        Node<E> n2 = other.map.get(e2);
+    public void union(E e1, E e2) {
+        Node<E> n1 = find(getNode(e1));
+        Node<E> n2 = find(getNode(e2));
 
         if (n1 == n2) {
             return;
@@ -46,15 +53,12 @@ public class DisjointSet<E> {
         }
     }
 
-    public E find(E element) {
-        Node<E> node = find(getNode(element));
-
+    private Node<E> find(Node<E> node) {
         if (node == node.parent) {
-            return node.datum;
+            return node;
         }
 
-        node.parent = find(getNode(element));
-        return node.parent.datum;
+        return find(node.parent);
     }
 
     private Node<E> getNode(E element) {
@@ -66,13 +70,5 @@ public class DisjointSet<E> {
         }
 
         return node;
-    }
-
-    private Node<E> find(Node<E> node) {
-        if (node == node.parent) {
-            return node;
-        }
-
-        return find(node.parent);
     }
 }

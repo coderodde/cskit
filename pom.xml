@@ -4,7 +4,7 @@
 
     <groupId>net.coderodde.cskit</groupId>
     <artifactId>ComputerScienceKit</artifactId>
-    <version>1.6</version>
+    <version>1.618033</version>
     <packaging>jar</packaging>
 
     <name>ComputerScienceKit</name>
@@ -20,6 +20,13 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -1,6 +1,7 @@
 package net.coderodde.cskit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Deque;
 import java.util.HashMap;
@@ -281,6 +282,53 @@ public class Utilities {
 
         return new Pair<List<DirectedGraphNode>, DirectedGraphWeightFunction>
                    (graph, w);
+    }
+
+    public static final boolean isSpanningTree(List<UndirectedGraphEdge> tree) {
+        Set<UndirectedGraphNode> set = new HashSet<UndirectedGraphNode>();
+
+        for (UndirectedGraphEdge e : tree) {
+            set.add(e.getA());
+            set.add(e.getB());
+        }
+
+        return set.size() > tree.size();
+    }
+
+    public static final double
+            sumEdgeWeights(List<UndirectedGraphEdge> edges) {
+        double sum = 0.0;
+
+        for (UndirectedGraphEdge e : edges) {
+            sum += e.getWeight();
+        }
+
+        return sum;
+    }
+
+    public static final boolean
+            spanningTreesEqual(List<UndirectedGraphEdge> tree1,
+                               List<UndirectedGraphEdge> tree2) {
+        if (tree1.size() != tree2.size()) {
+            return false;
+        }
+
+        Collections.sort(tree1, new UndirectedGraphEdge.AscendingComparator());
+        Collections.sort(tree2, new UndirectedGraphEdge.AscendingComparator());
+
+        for (int i = 0; i < tree1.size(); ++i) {
+            if (!Utilities.epsilonEquals(0.01,
+                                         tree1.get(i).getWeight(),
+                                         tree2.get(i).getWeight())) {
+                return false;
+            }
+
+            if (tree1.get(i).equals(tree2.get(i)) == false) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static final List<DirectedGraphNode>

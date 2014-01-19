@@ -17,8 +17,11 @@ import static net.coderodde.cskit.Utilities.getRandomGraph;
 import static net.coderodde.cskit.Utilities.getRandomIntegerArray;
 import static net.coderodde.cskit.Utilities.isConnectedPath;
 import static net.coderodde.cskit.Utilities.isSorted;
+import static net.coderodde.cskit.Utilities.isSpanningTree;
 import static net.coderodde.cskit.Utilities.line;
 import static net.coderodde.cskit.Utilities.pathsAreSame;
+import static net.coderodde.cskit.Utilities.spanningTreesEqual;
+import static net.coderodde.cskit.Utilities.sumEdgeWeights;
 import static net.coderodde.cskit.Utilities.title;
 import static net.coderodde.cskit.Utilities.title2;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
@@ -54,6 +57,8 @@ import net.coderodde.cskit.graph.flow.FlowFinder;
 import net.coderodde.cskit.graph.mst.KruskalMSTFinder;
 import net.coderodde.cskit.graph.mst.MinimumSpanningTreeFinder;
 import net.coderodde.cskit.graph.mst.PrimMSTFinder;
+import net.coderodde.cskit.sorting.HeapSort;
+import net.coderodde.ds.list.TreeList;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -61,18 +66,24 @@ import net.coderodde.cskit.graph.mst.PrimMSTFinder;
 public class Demo{
 
     public static void main(String... args) {
+        profileTreeList();
 //        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
 //                                       new CombSort<Integer>(),
 //                                       new CountingSort<Integer>(),
 //                                       new HeapSelectionSort<Integer>(),
 //                                       new IterativeMergeSort<Integer>(),
 //                                       new NaturalMergeSort<Integer>(),
-//                                       new TreeSort<Integer>());
+//                                       new TreeSort<Integer>(),
+//                                       new HeapSort<Integer>(
+//                                            new BinaryHeap<Integer, Integer>()),
+//                                       new HeapSort<Integer>(
+//                                            new FibonacciHeap<Integer, Integer>())
+//                );
 //        profileShortestPathAlgorithms();
 //        profileBreadthFirstSearchAlgorithms();
 //        profileOrderStatisticTree();
 //        profileMaxFlowAlgorithms();
-        profileMSTAlgorithms();
+//        profileMSTAlgorithms();
 //        debugMaxFlowAlgorithms();
 //        profileFibonacciHeap();
     }
@@ -735,19 +746,119 @@ public class Demo{
         long tb = System.currentTimeMillis();
 
         System.out.println("Kruskal in " + (tb - ta) + " ms, " +
-                "cost: " + result1.second);
+                "cost: " + result1.second +
+                "/" + sumEdgeWeights(result1.first) +
+                ", is spanning forest: " + isSpanningTree(result1.first)
+                );
 
-        MinimumSpanningTreeFinder finder =
+        MinimumSpanningTreeFinder finder2 =
                 new PrimMSTFinder();
 
         ta = System.currentTimeMillis();
 
         Pair<List<UndirectedGraphEdge>, Double> result2 =
-                finder1.find(pair.first, pair.second);
+                finder2.find(pair.first, pair.second);
 
         tb = System.currentTimeMillis();
 
         System.out.println("Prim in " + (tb - ta) + " ms, " +
-                "cost: " + result2.second);
+                "cost: " + result2.second + "/" +
+                sumEdgeWeights(result2.first) +
+                ", is spanning forest: " + isSpanningTree(result2.first));
+
+        line();
+
+        System.out.println("MST equal: " + spanningTreesEqual(result1.first,
+                                                              result2.first));
+    }
+
+    private static void profileTreeList() {
+        TreeList<Integer> list = new TreeList<Integer>();
+        org.apache.commons.collections4.list.TreeList<Integer> enemyList =
+                new org.apache.commons.collections4.list.TreeList<Integer>();
+
+        title("coderodde's TreeList vs. Commons Collections TreeList");
+
+        title2("Adding");
+
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
+
+        long ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000; ++i) {
+            list.add(i);
+        }
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
+
+        System.out.println("My TreeList.add in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000; ++i) {
+            enemyList.add(i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.add in " + (tb - ta) + " ms.");
+
+        title2("Getting by index");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000; ++i) {
+            if (list.get(i) != i) {
+                System.out.println("Fail!");
+                break;
+            }
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList.get in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000; ++i) {
+            if (enemyList.get(i) != i) {
+                System.out.println("Fail!");
+                break;
+            }
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.get in " + (tb - ta) + " ms.");
+
+        title2("Removing");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 9999; i >= 0; --i) {
+            if (i % 2 == 1) {
+                list.remove(i);
+            }
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList.remove in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 9999; i >= 0; --i) {
+            if (i % 2 == 1) {
+                enemyList.remove(i);
+            }
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.remove in " + (tb - ta) + " ms.");
+
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
     }
 }

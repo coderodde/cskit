@@ -68,7 +68,7 @@ public class PrimMSTFinder extends MinimumSpanningTreeFinder {
             UndirectedGraphNode u = Q.extractMinimum();
 
             for (UndirectedGraphNode v : u) {
-                if (Q.contains(u) && w.get(u, v) < Q.getPriority(v)) {
+                if (Q.contains(v) && w.get(u, v) < Q.getPriority(v)) {
                     parent.put(v, u);
                     Q.decreasePriority(v, w.get(u, v));
                 }
@@ -84,11 +84,11 @@ public class PrimMSTFinder extends MinimumSpanningTreeFinder {
             UndirectedGraphNode v = parent.get(u);
 
             if (v != null) {
-                UndirectedGraphEdge e = new UndirectedGraphEdge(u, v);
                 double edgeCost = w.get(u, v);
+                UndirectedGraphEdge e = new UndirectedGraphEdge(u, v);
                 e.setWeight(edgeCost);
-                edges.add(e);
                 cost += edgeCost;
+                edges.add(e);
             }
         }
 
