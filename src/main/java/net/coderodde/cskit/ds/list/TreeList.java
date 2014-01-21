@@ -5,7 +5,6 @@ import java.util.AbstractList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -78,21 +77,38 @@ implements Deque<E>, Serializable, Cloneable{
             return last - first + 1;
         }
 
+        /**
+         * Appends an element to this node's array.
+         *
+         * @param element element to append.
+         */
         void add(E element) {
             if (last == array.length - 1) {
                 final int left = Math.max((array.length - size()) >> 1, 1);
+
                 for (int i = first; i <= last; ++i) {
-                    array[i - 1] = array[i];
+                    array[i - left] = array[i];
                 }
-                array[last] = element;
-                --first;
-            } else {
-                array[++last] = element;
+
+                for (int i = last - left + 2, j = 1; j < left; ++j, ++i) {
+                    array[i] = null;
+                }
+
+                first -= left;
+                last -= left;
             }
+
+            array[++last] = element;
         }
 
-        void set(int index, E element) {
-            final int elementsBefore = first;
+        /**
+         * Inserts an element into this node's array.
+         *
+         * @param index the index to insert at.
+         * @param element the element to insert.
+         */
+        void add(int index, E element) {
+            final int elementsBefore = index - first;
             final int elementsAfter = last - index + 1;
 
             if (elementsBefore < elementsAfter) {
@@ -137,20 +153,20 @@ implements Deque<E>, Serializable, Cloneable{
         E remove(int index) {
             E old = (E) array[index + first];
 
-            final int elementsBefore = index - first;
-            final int elementsAfter = last - index;
+            final int elementsBefore = index;
+            final int elementsAfter = last - index - first;
 
             if (elementsBefore < elementsAfter) {
-                // Shift right.
-                for (int i = index - 1; i >= first; --i) {
+                // Shift left part to right.
+                for (int i = index + first - 1; i >= first; --i) {
                     array[i + 1] = array[i];
                 }
 
                 array[first++] = null;
             } else {
                 // elementsBefore >= elementsAfter
-                // Shift left.
-                for (int i = index; i < last; ++i) {
+                // Shift right part to left.
+                for (int i = index + first; i < last; ++i) {
                     array[i] = array[i + 1];
                 }
 
@@ -230,7 +246,7 @@ implements Deque<E>, Serializable, Cloneable{
             firstNode = newNode;
             fixAfterInsertion(newNode.parent);
         } else {
-            firstNode.set(0, e);
+            firstNode.add(0, e);
         }
 
         updateLeftCounters(firstNode, 1);
@@ -303,16 +319,22 @@ implements Deque<E>, Serializable, Cloneable{
             throw new NoSuchElementException("Removing from empty TreeList.");
         }
 
+        if (firstNode.size() == 0) {
+            System.out.println("Fail!");
+            System.out.println("first: " + firstNode.first);
+            System.out.println("last:  " + firstNode.last);
+        }
+
         E element = firstNode.remove(0);
+        updateLeftCounters(firstNode, -1);
 
         if (firstNode.size() == 0) {
             Node<E> removedNode = removeImpl(firstNode);
             fixAfterDeletion(removedNode);
             firstNode = removedNode.parent;
-            updateLeftCounters(firstNode, -1);
         }
 
-        --size;
+        --this.size;
         return element;
     }
 
@@ -352,6 +374,7 @@ implements Deque<E>, Serializable, Cloneable{
         E removedElement = n.remove(index - n.leftCount);
 
         if (n.size() == 0) {
+            System.out.println("yes!");
             Node<E> removedNode = removeImpl(n);
             fixAfterDeletion(removedNode);
             updateLeftCounters(removedNode, -1);
@@ -359,6 +382,7 @@ implements Deque<E>, Serializable, Cloneable{
             updateLeftCounters(n, -1);
         }
 
+        --size;
         return removedElement;
     }
 
@@ -786,15 +810,12 @@ implements Deque<E>, Serializable, Cloneable{
      * @return the actual node removed.
      */
     private Node<E> removeImpl(Node<E> e) {
-        --size;
-
         if (e.left == null && e.right == null) {
             // No children.
             Node<E> p = e.parent;
 
             if (p == null) {
                 // e is root.
-                root = null;
                 return e;
             }
 
@@ -811,7 +832,7 @@ implements Deque<E>, Serializable, Cloneable{
         if (e.left == null || e.right == null) {
             // One child.
             Node<E> child = e.left != null ? e.left : e.right;
-            Node<E> p = child.parent;
+            Node<E> p = e.parent;
             child.parent = p;
 
             if (p == null) {
@@ -830,11 +851,13 @@ implements Deque<E>, Serializable, Cloneable{
 
         // Two children.
         Node<E> successor = e.right.min();
-        Node<E> child = successor.right;
-        Node<E> p = successor.parent;
+
         e.array = successor.array;
         e.first = successor.first;
         e.last = successor.last;
+
+        Node<E> child = successor.right;
+        Node<E> p = successor.parent;
 
         if (p.left == successor) {
             p.left = child;

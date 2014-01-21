@@ -66,6 +66,7 @@ import net.coderodde.cskit.ds.list.TreeList;
 public class Demo{
 
     public static void main(String... args) {
+        debugTreeList();
         profileTreeList();
 //        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
 //                                       new CombSort<Integer>(),
@@ -785,7 +786,7 @@ public class Demo{
 
         long ta = System.currentTimeMillis();
 
-        for (int i = 0; i < 10000; ++i) {
+        for (int i = 0; i < 100000; ++i) {
             list.add(i);
         }
 
@@ -797,7 +798,7 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        for (int i = 0; i < 10000; ++i) {
+        for (int i = 0; i < 100000; ++i) {
             enemyList.add(i);
         }
 
@@ -809,9 +810,9 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        for (int i = 0; i < 10000; ++i) {
+        for (int i = 0; i < 100000; ++i) {
             if (list.get(i) != i) {
-                System.out.println("Fail!");
+                System.out.println("coderodde's TreeList.get(int) is broken!");
                 break;
             }
         }
@@ -822,9 +823,9 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        for (int i = 0; i < 10000; ++i) {
+        for (int i = 0; i < 100000; ++i) {
             if (enemyList.get(i) != i) {
-                System.out.println("Fail!");
+                System.out.println("CC TreeList.get(int) is broken!");
                 break;
             }
         }
@@ -837,9 +838,16 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        for (int i = 9999; i >= 0; --i) {
+        Integer tmp;
+
+        for (int i = 99999; i >= 0; --i) {
             if (i % 2 == 1) {
-                list.remove(i);
+                if ((tmp = list.remove(i)) != i) {
+                    System.out.println("coderodde's TreeList.remove(int) is " +
+                            "broken! " + tmp + " at " + i
+                            );
+                    break;
+                }
             }
         }
 
@@ -849,9 +857,13 @@ public class Demo{
 
         ta = System.currentTimeMillis();
 
-        for (int i = 9999; i >= 0; --i) {
+        for (int i = 99999; i >= 0; --i) {
             if (i % 2 == 1) {
-                enemyList.remove(i);
+                if ((tmp = enemyList.remove(i)) != i) {
+                    System.out.println("CC TreeList.remove(int) is broken! "
+                            + tmp + " at " + i);
+                    break;
+                }
             }
         }
 
@@ -860,5 +872,60 @@ public class Demo{
         System.out.println("CC TreeList.remove in " + (tb - ta) + " ms.");
 
         System.out.println("My TreeList is healthy: " + list.isHealthy());
+
+        title2("Removing from head");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 20000; i > 0; --i) {
+            list.removeFirst();
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList.removeFirst in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 20000; i > 0; --i) {
+                enemyList.remove(0);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.removeFirst hack in " + (tb - ta)
+                + " ms.");
+
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
+    }
+
+    private static void debugTreeList() {
+        TreeList<Integer> tl = new TreeList<Integer>(32);
+        Integer tmp;
+
+        final int N = 60;
+
+        for (int i = 0; i < N; ++i) {
+            tl.add(i);
+        }
+
+        System.out.println("Size: " + tl.size());
+
+        for (int i = 0; i < N; ++i) {
+            if ((tmp = tl.get(i)) != i) {
+                System.out.println("Broken get(int): expected: " + i
+                        + ", actual: " + tmp);
+            }
+        }
+
+        for (int i = N; i >= 0; --i) {
+            if (i % 2 == 1) {
+                if ((tmp = tl.remove(i)) != i) {
+                    System.out.println("Removed: " + tmp + ", expected " + i);
+                }
+            }
+        }
+
+        System.out.println("Healthy: " + tl.isHealthy());
     }
 }
