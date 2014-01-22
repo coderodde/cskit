@@ -897,6 +897,71 @@ public class Demo{
                 + " ms.");
 
         System.out.println("My TreeList is healthy: " + list.isHealthy());
+
+        title2("Removing from tail");
+
+        list.clear();
+        enemyList.clear();
+
+        for (int i = 0; i < 100000; ++i) {
+            list.add(i);
+            enemyList.add(i);
+        }
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 20000; i > 0; --i) {
+            list.removeLast();
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList.removeLast in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 20000; i > 0; --i) {
+            enemyList.remove(enemyList.size() - 1);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.removeLast hack in " + (tb - ta) +
+                " ms.");
+
+        System.out.println("My TreeList is healty: " + list.isHealthy());
+
+        title2("Resetting elements");
+
+        Random r = new Random();
+
+        int[] resetIndices = new int[list.size() / 2];
+
+        for (int i = 0; i < resetIndices.length; ++i) {
+            resetIndices[i] = r.nextInt(list.size() / 2);
+        }
+
+        ta = System.currentTimeMillis();
+
+        for (int i : resetIndices) {
+            list.set(i, i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList.set in " + (tb - ta) + " ms.");
+
+        ta = System.currentTimeMillis();
+
+        for (int i : resetIndices) {
+            enemyList.set(i, i);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.set in " + (tb - ta) + " ms.");
+
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
     }
 
     private static void debugTreeList() {

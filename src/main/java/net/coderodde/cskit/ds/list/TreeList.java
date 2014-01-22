@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
  */
 public class TreeList<E>
 extends AbstractList<E>
-implements Deque<E>, Serializable, Cloneable{
+implements Deque<E>, Serializable, Cloneable {
 
     private static final int DEFAULT_DEGREE = 128;
 
@@ -286,6 +286,27 @@ implements Deque<E>, Serializable, Cloneable{
     }
 
     @Override
+    public E set(int index, E element) {
+        Node<E> n = root;
+
+        for(;;) {
+            if (index < n.leftCount) {
+                n = n.left;
+            } else if (index >= n.leftCount + n.size()) {
+                index -= n.leftCount + n.size();
+                n = n.right;
+            } else {
+                break;
+            }
+        }
+
+        final int indx = index + n.first - n.leftCount;
+        E ret = (E) n.array[indx];
+        n.array[indx] = element;
+        return ret;
+    }
+
+    @Override
     public int size() {
         return size;
     }
@@ -374,7 +395,6 @@ implements Deque<E>, Serializable, Cloneable{
         E removedElement = n.remove(index - n.leftCount);
 
         if (n.size() == 0) {
-            System.out.println("yes!");
             Node<E> removedNode = removeImpl(n);
             fixAfterDeletion(removedNode);
             updateLeftCounters(removedNode, -1);
@@ -388,32 +408,60 @@ implements Deque<E>, Serializable, Cloneable{
 
     @Override
     public E pollFirst() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            return null;
+        }
+
+        return (E) firstNode.array[firstNode.first];
     }
 
     @Override
     public E pollLast() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            return null;
+        }
+
+        return (E) lastNode.array[lastNode.last];
     }
 
     @Override
     public E getFirst() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Reading the head of an empty list."
+                    );
+        }
+
+        return (E) firstNode.array[firstNode.first];
     }
 
     @Override
     public E getLast() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Reading the tail of an empty list."
+                    );
+        }
+
+        return (E) lastNode.array[lastNode.last];
     }
 
     @Override
     public E peekFirst() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            return null;
+        }
+
+        return (E) firstNode.array[firstNode.first];
     }
 
     @Override
     public E peekLast() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            return null;
+        }
+
+        return (E) lastNode.array[lastNode.last];
     }
 
     @Override
@@ -428,37 +476,48 @@ implements Deque<E>, Serializable, Cloneable{
 
     @Override
     public boolean offer(E e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        add(e);
+        return true;
     }
 
     @Override
     public E remove() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return removeFirst();
     }
 
     @Override
     public E poll() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return size == 0 ? null : (E) firstNode.array[firstNode.first];
     }
 
     @Override
     public E element() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Reading the head of an empty list."
+                    );
+        }
+
+        return (E) firstNode.array[firstNode.first];
     }
 
     @Override
     public E peek() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return size == 0 ? null : (E) firstNode.array[firstNode.first];
     }
 
     @Override
     public void push(E e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        addFirst(e);
     }
 
     @Override
     public E pop() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (size == 0) {
+            throw new NoSuchElementException("Popping from an empty list.");
+        }
+
+        return removeFirst();
     }
 
     @Override
@@ -501,14 +560,9 @@ implements Deque<E>, Serializable, Cloneable{
         }
 
         boolean leftOk = root.leftCount == countLeft(root.left);
-        boolean rightOk = true;
-
-        if (root.right != null) {
-            rightOk = (root.right.leftCount == countLeft(root.right.left));
-        }
-//        boolean rightOk = (root.right != null)
-//                         ? root.right.leftCount == countLeft(root.right.left) :
-//                         true;
+        boolean rightOk = (root.right != null)
+                         ? root.right.leftCount == countLeft(root.right.left) :
+                         true;
 
         return leftOk && rightOk;
     }
