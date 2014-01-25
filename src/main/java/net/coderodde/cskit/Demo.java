@@ -67,7 +67,7 @@ public class Demo{
 
     public static void main(String... args) {
         debugTreeList();
-        profileTreeList();
+//        profileTreeList();
 //        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
 //                                       new CombSort<Integer>(),
 //                                       new CountingSort<Integer>(),
@@ -962,6 +962,38 @@ public class Demo{
         System.out.println("CC TreeList.set in " + (tb - ta) + " ms.");
 
         System.out.println("My TreeList is healthy: " + list.isHealthy());
+
+        title2("Adding at arbitrary location");
+
+        final long SEED = 12321L; //System.currentTimeMillis();
+
+        r = new Random(SEED);
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i < 10000; ++i) {
+            int t = r.nextInt(list.size());
+            list.add(t, t);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("My TreeList.add(int, E) in " + (tb - ta) + " ms.");
+
+        r = new Random(SEED);
+
+        ta = System.currentTimeMillis();
+
+        for (int i = 0; i <10000; ++i) {
+            int t = r.nextInt(enemyList.size());
+            enemyList.add(t, t);
+        }
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("CC TreeList.add(int, E) in " + (tb - ta) + " ms.");
+
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
     }
 
     private static void debugTreeList() {
@@ -992,5 +1024,41 @@ public class Demo{
         }
 
         System.out.println("Healthy: " + tl.isHealthy());
+        Random r = new Random(12321L);
+
+        // fails at i: 100, 50, 25, 20
+        for (int i = 0; i < 100; ++i) {
+            int yo = r.nextInt(tl.size());
+            tl.add(yo, yo);
+            System.out.println(yo + "(" + i + "): " + tl.isHealthy());
+        }
+
+        System.out.println("Healthy: " + tl.isHealthy());
+    }
+
+
+
+    private static void debugTreeList2() {
+        org.apache.commons.collections4.list.TreeList<Integer> el =
+                new org.apache.commons.collections4.list.TreeList<Integer>();
+
+        TreeList<Integer> ml = new TreeList<Integer>(2);
+        Random r = new Random(313L);
+
+        el.add(-1);
+
+        for (int i = 0; i < 10; ++i) {
+
+            el.add(i, i);
+//            System.out.println(i + ": " + ml.isHealthy());
+        }
+
+        System.out.println(ml.isHealthy());
+
+        for (Integer i : el) {
+            System.out.print(i + " ");
+        }
+
+        System.out.println();
     }
 }

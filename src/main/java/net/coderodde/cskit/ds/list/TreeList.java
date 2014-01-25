@@ -2,9 +2,11 @@ package net.coderodde.cskit.ds.list;
 
 import java.io.Serializable;
 import java.util.AbstractList;
+import java.util.ConcurrentModificationException;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -17,6 +19,8 @@ import java.util.NoSuchElementException;
 public class TreeList<E>
 extends AbstractList<E>
 implements Deque<E>, Serializable, Cloneable {
+
+    public static boolean DEBUG_MSG = true;
 
     private static final int DEFAULT_DEGREE = 128;
 
@@ -108,8 +112,8 @@ implements Deque<E>, Serializable, Cloneable {
          * @param element the element to insert.
          */
         void add(int index, E element) {
-            final int elementsBefore = index - first;
-            final int elementsAfter = last - index + 1;
+            final int elementsBefore = index;
+            final int elementsAfter = last - first + 1 - index; // 16 - 12 = 3
 
             if (elementsBefore < elementsAfter) {
                 if (first > 0) {
@@ -147,7 +151,7 @@ implements Deque<E>, Serializable, Cloneable {
             }
 
             // Do insert.
-            array[index] = element;
+            array[index + first] = element;
         }
 
         E remove(int index) {
@@ -185,8 +189,45 @@ implements Deque<E>, Serializable, Cloneable {
             last = 0;
         }
 
-        E last() {
-            return (E) array[last];
+        /**
+         * Assumes that this node is full.
+         *
+         * @return the right node.
+         */
+        Node<E> split() {
+            // TODO: make this run faster.
+            final int degree = this.array.length;
+
+            Node<E> newNode = new Node<E>(degree);
+
+            final int leftElements = degree >> 1;
+            final int leftSkip = (degree - leftElements) >> 1;
+            final int rightElements = degree - leftElements;
+            final int rightSkip = (degree - rightElements) >> 1;
+
+            this.first = leftSkip;
+            this.last = leftSkip + leftElements - 1;
+            newNode.first = rightSkip;
+            newNode.last = rightSkip + rightElements - 1;
+
+            int limit = rightSkip + rightElements;
+
+            // Load the right block of this to newNode.
+            for (int i = rightSkip, j = leftElements;
+                    i < limit;
+                    ++i, ++j) {
+                newNode.array[i] = this.array[j];
+                this.array[j] = null;
+            }
+
+            if (leftSkip > 0) {
+                for (int i = leftElements - 1; i >= 0; --i) {
+                    this.array[i + leftSkip] = this.array[i];
+                    this.array[i] = null;
+                }
+            }
+
+            return newNode;
         }
 
         Node<E> min() {
@@ -198,6 +239,44 @@ implements Deque<E>, Serializable, Cloneable {
 
             return e;
         }
+
+        Node<E> max() {
+            Node<E> e = this;
+
+            while (e.right != null) {
+                e = e.right;
+            }
+
+            return e;
+        }
+
+        Node<E> successor() {
+            if (right != null) {
+                return right.min();
+            }
+
+            Node<E> n = this;
+
+            while (n.parent != null && n.parent.right == n) {
+                n = n.parent;
+            }
+
+            return n.parent;
+        }
+
+        Node<E> predecessor() {
+            if (left != null) {
+                return left.max();
+            }
+
+            Node<E> n = this;
+
+            while (n.parent != null && n.parent.left == n) {
+                n = n.parent;
+            }
+
+            return n.parent;
+        }
     }
 
     private final int degree;
@@ -205,6 +284,7 @@ implements Deque<E>, Serializable, Cloneable {
     private Node<E> root;
     private Node<E> firstNode;
     private Node<E> lastNode;
+    private long modCount;
 
     public TreeList(final int degree) {
         checkDegree(degree);
@@ -233,6 +313,7 @@ implements Deque<E>, Serializable, Cloneable {
         }
 
         ++size;
+        ++modCount;
         return true;
     }
 
@@ -250,6 +331,7 @@ implements Deque<E>, Serializable, Cloneable {
         }
 
         updateLeftCounters(firstNode, 1);
+        ++modCount;
         ++size;
     }
 
@@ -266,6 +348,59 @@ implements Deque<E>, Serializable, Cloneable {
             lastNode.add(e);
         }
 
+        ++modCount;
+        ++size;
+    }
+
+    @Override
+    public void add(int index, E element) {
+        Node<E> n = root;
+
+        for (;;) {
+            if (index < n.leftCount) {
+                n = n.left;
+            } else if (index >= n.leftCount + n.size()) {
+                index -= n.leftCount + n.size();
+                n = n.right;
+            } else {
+                index -= n.leftCount;
+                break;
+            }
+        }
+
+        if (n.size() == degree) {
+            // Split node 'n'.
+            Node<E> newNode = n.split();
+
+            if (index < n.size()) {
+                n.add(index, element);
+            } else {
+                newNode.add(index - n.size(), element);
+            }
+
+            if (n.right == null) {
+                n.right = newNode;
+                newNode.parent = n;
+
+                if (lastNode == n) {
+                    lastNode = newNode;
+                }
+
+                updateLeftCounters(n, 1);
+                fixAfterInsertion(n);
+            } else {
+                Node<E> successor = n.right.min();
+                successor.left = newNode;
+                newNode.parent = successor;
+                updateLeftCounters(newNode, newNode.size());
+                fixAfterInsertion(successor);
+            }
+        } else {
+            n.add(index, element);
+            updateLeftCounters(n, 1);
+        }
+
+        ++modCount;
         ++size;
     }
 
@@ -320,6 +455,7 @@ implements Deque<E>, Serializable, Cloneable {
         root.clear();
         firstNode = root;
         lastNode = root;
+        ++modCount;
     }
 
     @Override
@@ -355,7 +491,8 @@ implements Deque<E>, Serializable, Cloneable {
             firstNode = removedNode.parent;
         }
 
-        --this.size;
+        --size;
+        ++modCount;
         return element;
     }
 
@@ -374,6 +511,7 @@ implements Deque<E>, Serializable, Cloneable {
         }
 
         --size;
+        ++modCount;
         return element;
     }
 
@@ -403,6 +541,7 @@ implements Deque<E>, Serializable, Cloneable {
         }
 
         --size;
+        ++modCount;
         return removedElement;
     }
 
@@ -521,8 +660,30 @@ implements Deque<E>, Serializable, Cloneable {
     }
 
     @Override
+    public Iterator<E> iterator() {
+        return new AscendingListIterator(this.firstNode, 0, 0);
+    }
+
+    @Override
     public Iterator<E> descendingIterator() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new AscendingListIterator(this.lastNode,
+                                         this.lastNode.size(),
+                                         this.size) {
+            @Override
+            public boolean hasNext() {
+                return super.hasPrevious();
+            }
+
+            @Override
+            public E next() {
+                return super.previous();
+            }
+
+            @Override
+            public void remove() {
+                super.remove();
+            }
+        };
     }
 
     /**
@@ -547,6 +708,17 @@ implements Deque<E>, Serializable, Cloneable {
             return true;
         }
 
+        int h = checkHeight(root);
+
+        if (h != root.height) {
+            if (DEBUG_MSG) {
+                System.err.println("DEBUG: root's actual height is " + h
+                        + ", recorded: " + root.height);
+            }
+
+            return false;
+        }
+
         return checkHeight(root) == root.height;
     }
 
@@ -559,10 +731,31 @@ implements Deque<E>, Serializable, Cloneable {
             return true;
         }
 
-        boolean leftOk = root.leftCount == countLeft(root.left);
-        boolean rightOk = (root.right != null)
-                         ? root.right.leftCount == countLeft(root.right.left) :
-                         true;
+        int left = countLeft(root.left);
+        boolean leftOk = root.leftCount == left;
+
+        if (leftOk == false) {
+            if (DEBUG_MSG) {
+                System.err.println("Root's actual left count is "
+                        + left + ", recorded " + root.leftCount);
+            }
+        }
+
+        boolean rightOk = true;
+
+        if (root.right != null) {
+            int right = countLeft(root.right.left);
+
+            if (right != root.right.leftCount) {
+                rightOk = false;
+
+                if (DEBUG_MSG) {
+                    System.err.println("Root's right node's actual left count "
+                            + "is " + right + ", recorded "
+                            + root.right.leftCount);
+                }
+            }
+        }
 
         return leftOk && rightOk;
     }
@@ -631,7 +824,6 @@ implements Deque<E>, Serializable, Cloneable {
         }
 
         if ((r = countLeft(e.right)) == Integer.MIN_VALUE) {
-//            System.out.println("Counted: " + r + ", recorded: " + e.leftCount);
             System.out.println("Broken left counter II.");
             return Integer.MIN_VALUE;
         }
@@ -645,7 +837,10 @@ implements Deque<E>, Serializable, Cloneable {
         }
 
         if (set.contains(e)) {
-            System.out.println(":( Found a cycle!");
+            if (DEBUG_MSG) {
+                System.err.println("DEBUG: This TreeList contains cycles!");
+            }
+
             return true;
         }
 
@@ -663,7 +858,7 @@ implements Deque<E>, Serializable, Cloneable {
     }
 
     private void checkDegree(final int degree) {
-        if (degree < 1) {
+        if (degree < 2) {
             throw new IllegalArgumentException("Invalid degree: " + degree);
         }
     }
@@ -933,6 +1128,99 @@ implements Deque<E>, Serializable, Cloneable {
             }
 
             from = from.parent;
+        }
+    }
+
+    private class AscendingListIterator implements ListIterator<E> {
+        private long expectedModCount = TreeList.this.modCount;
+        private Node<E> currentNode = TreeList.this.firstNode;
+        private int currentIndex;
+        private int totalIndex;
+
+        AscendingListIterator(Node<E> initialNode,
+                              int initialCurrentIndex,
+                              int initialTotalIndex) {
+            this.currentNode = initialNode;
+            this.currentIndex = initialCurrentIndex;
+            this.totalIndex = initialTotalIndex;
+        }
+
+        @Override
+        public boolean hasNext() {
+            checkModCount();
+            return totalIndex < TreeList.this.size;
+        }
+
+        @Override
+        public E next() {
+            checkModCount();
+
+            if (currentIndex == currentNode.size()) {
+                currentIndex = 0;
+                currentNode = currentNode.successor();
+            }
+
+            ++totalIndex;
+            return (E) currentNode.array[currentIndex++];
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            checkModCount();
+            return totalIndex > 0;
+        }
+
+        @Override
+        public E previous() {
+            checkModCount();
+
+            if (currentIndex == 0) {
+                currentNode = currentNode.predecessor();
+                currentIndex = currentNode.size();
+            }
+
+            --totalIndex;
+            return (E) currentNode.array[--currentIndex];
+        }
+
+        @Override
+        public int nextIndex() {
+            checkModCount();
+            return totalIndex;
+        }
+
+        @Override
+        public int previousIndex() {
+            checkModCount();
+            return totalIndex - 1;
+        }
+
+        @Override
+        public void remove() {
+            checkModCount();
+            ++expectedModCount;
+            TreeList.this.remove(totalIndex);
+        }
+
+        @Override
+        public void set(E e) {
+            checkModCount();
+            currentNode.array[currentIndex] = e;
+        }
+
+        @Override
+        public void add(E e) {
+            checkModCount();
+            ++expectedModCount;
+            TreeList.this.add(totalIndex, e);
+        }
+
+        private void checkModCount() {
+            if (this.expectedModCount != TreeList.this.modCount) {
+                throw new ConcurrentModificationException(
+                        "This TreeList is modified while iterating."
+                        );
+            }
         }
     }
 }
