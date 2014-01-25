@@ -392,7 +392,8 @@ implements Deque<E>, Serializable, Cloneable {
                 Node<E> successor = n.right.min();
                 successor.left = newNode;
                 newNode.parent = successor;
-                updateLeftCounters(newNode, newNode.size());
+                updateLeftCounters(newNode, newNode.size(), n);
+                updateLeftCounters(n, 1);
                 fixAfterInsertion(successor);
             }
         } else {
@@ -1123,6 +1124,16 @@ implements Deque<E>, Serializable, Cloneable {
 
     private void updateLeftCounters(Node<E> from, int delta) {
         while (from != null) {
+            if (from.parent != null && from.parent.left == from) {
+                from.parent.leftCount += delta;
+            }
+
+            from = from.parent;
+        }
+    }
+
+    private void updateLeftCounters(Node<E> from, int delta, Node<E> until) {
+        while (from != null && from != until) {
             if (from.parent != null && from.parent.left == from) {
                 from.parent.leftCount += delta;
             }
