@@ -1,6 +1,7 @@
 package net.coderodde.cskit;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -66,7 +67,8 @@ import net.coderodde.cskit.ds.list.TreeList;
 public class Demo{
 
     public static void main(String... args) {
-        debugTreeList();
+//        debugTreeList();
+        debugTreeList3();
 //        profileTreeList();
 //        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
 //                                       new CombSort<Integer>(),
@@ -792,9 +794,8 @@ public class Demo{
 
         long tb = System.currentTimeMillis();
 
-        System.out.println("My TreeList is healthy: " + list.isHealthy());
-
         System.out.println("My TreeList.add in " + (tb - ta) + " ms.");
+
 
         ta = System.currentTimeMillis();
 
@@ -805,6 +806,7 @@ public class Demo{
         tb = System.currentTimeMillis();
 
         System.out.println("CC TreeList.add in " + (tb - ta) + " ms.");
+        System.out.println("My TreeList is healthy: " + list.isHealthy());
 
         title2("Getting by index");
 
@@ -997,46 +999,25 @@ public class Demo{
     }
 
     private static void debugTreeList() {
-        TreeList<Integer> tl = new TreeList<Integer>(32);
-        Integer tmp;
+        TreeList<Integer> tl = new TreeList<Integer>(3);
 
-        final int N = 60;
+        tl.add(0, 0);
 
-        for (int i = 0; i < N; ++i) {
-            tl.add(i);
-        }
-
-        System.out.println("Size: " + tl.size());
-
-        for (int i = 0; i < N; ++i) {
-            if ((tmp = tl.get(i)) != i) {
-                System.out.println("Broken get(int): expected: " + i
-                        + ", actual: " + tmp);
-            }
-        }
-
-        for (int i = N; i >= 0; --i) {
-            if (i % 2 == 1) {
-                if ((tmp = tl.remove(i)) != i) {
-                    System.out.println("Removed: " + tmp + ", expected " + i);
-                }
-            }
-        }
-
-        System.out.println("Healthy: " + tl.isHealthy());
         Random r = new Random(12321L);
 
-        // fails at i: 100, 50, 25, 20
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 14; ++i) {
             int yo = r.nextInt(tl.size());
             tl.add(yo, yo);
-            System.out.println(yo + "(" + i + "): " + tl.isHealthy());
         }
 
-        System.out.println("Healthy: " + tl.isHealthy());
+        System.out.println("TreeList is healthy after add(int, E): "
+                + tl.isHealthy());
+
+        while (tl.isEmpty() == false) {
+            tl.removeFirst();
+            System.out.println("Healthy: " + tl.isHealthy());
+        }
     }
-
-
 
     private static void debugTreeList2() {
         org.apache.commons.collections4.list.TreeList<Integer> el =
@@ -1060,5 +1041,37 @@ public class Demo{
         }
 
         System.out.println();
+    }
+
+    private static void debugTreeList3() {
+        TreeList<Integer> list = new TreeList<Integer>(3);
+
+        list.clear();
+
+        for (int i = 0; i < 100; ++i) {
+            list.add(i);
+        }
+
+        System.out.println(list.isHealthy());
+
+        Iterator<Integer> iter = list.iterator();
+        Integer i = 0;
+
+        while (iter.hasNext()) {
+            System.out.println(i);
+            System.out.println((i++) + ", " + iter.next());
+        }
+
+        Iterator<Integer> descIter = list.descendingIterator();
+
+        i = 99;
+
+        while (i >= 0) {
+            System.out.println(i);
+            System.out.println(i + ", " + descIter.next());
+            --i;
+        }
+
+        System.out.println(descIter.hasNext());
     }
 }

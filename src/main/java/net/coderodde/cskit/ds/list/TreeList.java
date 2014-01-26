@@ -22,7 +22,7 @@ implements Deque<E>, Serializable, Cloneable {
 
     public static boolean DEBUG_MSG = true;
 
-    private static final int DEFAULT_DEGREE = 128;
+    private static final int DEFAULT_DEGREE = 512;
 
     /**
      * This class implements a node in the AVL-tree containing a
@@ -185,8 +185,8 @@ implements Deque<E>, Serializable, Cloneable {
                 array[i] = null;
             }
 
-            first = 0;
-            last = 0;
+            first = array.length >> 1;
+            last = first - 1;
         }
 
         /**
@@ -354,6 +354,11 @@ implements Deque<E>, Serializable, Cloneable {
 
     @Override
     public void add(int index, E element) {
+        if (size == 0) {
+            add(element);
+            return;
+        }
+
         Node<E> n = root;
 
         for (;;) {
@@ -489,7 +494,9 @@ implements Deque<E>, Serializable, Cloneable {
         if (firstNode.size() == 0) {
             Node<E> removedNode = removeImpl(firstNode);
             fixAfterDeletion(removedNode);
-            firstNode = removedNode.parent;
+            firstNode = (removedNode.parent == null ?
+                                               root :
+                                               removedNode.parent.min());
         }
 
         --size;
