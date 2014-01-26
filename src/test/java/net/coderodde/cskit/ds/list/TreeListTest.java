@@ -1,6 +1,7 @@
 package net.coderodde.cskit.ds.list;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -54,6 +55,19 @@ public class TreeListTest {
         assertEquals(100, list.size());
         assertFalse(list.isEmpty());
         assertTrue(list.isHealthy());
+    }
+
+    @Test
+    public void iteratorsOnEmpty() {
+        Iterator<Integer> i1 = list.iterator();
+        assertFalse(i1.hasNext());
+
+        Iterator<Integer> i2 = list.iterator();
+        assertFalse(i2.hasNext());
+
+        ListIterator<Integer> i3 = list.listIterator();
+        assertFalse(i3.hasNext());
+        assertFalse(i3.hasPrevious());
     }
 
     @Test

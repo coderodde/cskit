@@ -3,6 +3,7 @@ package net.coderodde.cskit;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
@@ -1052,7 +1053,7 @@ public class Demo{
             list.add(i);
         }
 
-        System.out.println(list.isHealthy());
+        System.out.println("Funkeeh?: " + list.isHealthy());
 
         Iterator<Integer> iter = list.iterator();
         Integer i = 0;
@@ -1073,5 +1074,17 @@ public class Demo{
         }
 
         System.out.println(descIter.hasNext());
+
+        list.clear();
+
+        Iterator<Integer> i1 = list.iterator();
+        System.out.println(i1.hasNext());
+
+        Iterator<Integer> i2 = list.descendingIterator();
+        System.out.println(i2.hasNext());
+
+        ListIterator<Integer> i3 = list.listIterator();
+        System.out.println(i3.hasNext());
+        System.out.println(i3.hasPrevious());
     }
 }

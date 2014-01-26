@@ -10,23 +10,22 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 /**
- * This class implements an AVL-tree based list, providing efficient access
- * to elements.
+ * This class implements an AVL-tree based list, providing efficient access to
+ * elements.
  *
  * @author Rodion Efremov
  * @version 1.618033 (11.1.2014)
  */
 public class TreeList<E>
-extends AbstractList<E>
-implements Deque<E>, Serializable, Cloneable {
+        extends AbstractList<E>
+        implements Deque<E>, Serializable, Cloneable {
 
     public static boolean DEBUG_MSG = true;
-
     private static final int DEFAULT_DEGREE = 512;
 
     /**
-     * This class implements a node in the AVL-tree containing a
-     * contiguous sublist with at most <tt>degree</tt> elements.
+     * This class implements a node in the AVL-tree containing a contiguous
+     * sublist with at most <tt>degree</tt> elements.
      *
      * @param <E> the element type.
      */
@@ -36,37 +35,30 @@ implements Deque<E>, Serializable, Cloneable {
          * The left subtree.
          */
         Node<E> left;
-
         /**
          * The right subtree.
          */
         Node<E> right;
-
         /**
          * The parent node.
          */
         Node<E> parent;
-
         /**
          * The height of this node.
          */
         int height;
-
         /**
          * The element amount of the left subtree.
          */
         int leftCount;
-
         /**
          * The array for storing elements.
          */
         Object[] array;
-
         /**
          * The leftmost index of the element array.
          */
         int first;
-
         /**
          * The rightmost index of the element array.
          */
@@ -278,7 +270,6 @@ implements Deque<E>, Serializable, Cloneable {
             return n.parent;
         }
     }
-
     private final int degree;
     private int size;
     private Node<E> root;
@@ -430,7 +421,7 @@ implements Deque<E>, Serializable, Cloneable {
     public E set(int index, E element) {
         Node<E> n = root;
 
-        for(;;) {
+        for (;;) {
             if (index < n.leftCount) {
                 n = n.left;
             } else if (index >= n.leftCount + n.size()) {
@@ -494,9 +485,9 @@ implements Deque<E>, Serializable, Cloneable {
         if (firstNode.size() == 0) {
             Node<E> removedNode = removeImpl(firstNode);
             fixAfterDeletion(removedNode);
-            firstNode = (removedNode.parent == null ?
-                                               root :
-                                               removedNode.parent.min());
+            firstNode = (removedNode.parent == null
+                    ? root
+                    : removedNode.parent.min());
         }
 
         --size;
@@ -575,8 +566,7 @@ implements Deque<E>, Serializable, Cloneable {
     public E getFirst() {
         if (size == 0) {
             throw new NoSuchElementException(
-                    "Reading the head of an empty list."
-                    );
+                    "Reading the head of an empty list.");
         }
 
         return (E) firstNode.array[firstNode.first];
@@ -586,8 +576,7 @@ implements Deque<E>, Serializable, Cloneable {
     public E getLast() {
         if (size == 0) {
             throw new NoSuchElementException(
-                    "Reading the tail of an empty list."
-                    );
+                    "Reading the tail of an empty list.");
         }
 
         return (E) lastNode.array[lastNode.last];
@@ -641,8 +630,7 @@ implements Deque<E>, Serializable, Cloneable {
     public E element() {
         if (size == 0) {
             throw new NoSuchElementException(
-                    "Reading the head of an empty list."
-                    );
+                    "Reading the head of an empty list.");
         }
 
         return (E) firstNode.array[firstNode.first];
@@ -669,29 +657,22 @@ implements Deque<E>, Serializable, Cloneable {
 
     @Override
     public Iterator<E> iterator() {
-        return new AscendingListIterator(this.firstNode, 0, 0);
+        return new AscendingListIterator(0);
     }
 
     @Override
     public Iterator<E> descendingIterator() {
-        return new AscendingListIterator(this.lastNode,
-                                         this.lastNode.size(),
-                                         this.size) {
-            @Override
-            public boolean hasNext() {
-                return super.hasPrevious();
-            }
+        return new DescendingIterator();
+    }
 
-            @Override
-            public E next() {
-                return super.previous();
-            }
+    @Override
+    public ListIterator<E> listIterator(int index) {
+        return new AscendingListIterator(index);
+    }
 
-            @Override
-            public void remove() {
-                super.remove();
-            }
-        };
+    @Override
+    public ListIterator<E> listIterator() {
+        return new AscendingListIterator(0);
     }
 
     /**
@@ -965,9 +946,9 @@ implements Deque<E>, Serializable, Cloneable {
             if (h(e.left) == h(e.right) + 2) {
                 Node<E> p = e.parent;
                 Node<E> subroot =
-                        (h(e.left.left) >= h(e.left.right)) ?
-                            rightRotate(e) :
-                            leftRightRotate(e);
+                        (h(e.left.left) >= h(e.left.right))
+                        ? rightRotate(e)
+                        : leftRightRotate(e);
 
                 if (p == null) {
                     root = subroot;
@@ -985,9 +966,9 @@ implements Deque<E>, Serializable, Cloneable {
             } else if (h(e.left) + 2 == h(e.right)) {
                 Node<E> p = e.parent;
                 Node<E> subroot =
-                        (h(e.right.right) >= h(e.right.left)) ?
-                            leftRotate(e) :
-                            rightLeftRotate(e);
+                        (h(e.right.right) >= h(e.right.left))
+                        ? leftRotate(e)
+                        : rightLeftRotate(e);
 
                 if (p == null) {
                     root = subroot;
@@ -1019,9 +1000,9 @@ implements Deque<E>, Serializable, Cloneable {
             if (h(e.left) == h(e.right) + 2) {
                 Node<E> p = e.parent;
                 Node<E> subroot =
-                        (h(e.left.left) >= h(e.left.right)) ?
-                            rightRotate(e) :
-                            leftRightRotate(e);
+                        (h(e.left.left) >= h(e.left.right))
+                        ? rightRotate(e)
+                        : leftRightRotate(e);
 
                 if (p == null) {
                     root = subroot;
@@ -1037,9 +1018,9 @@ implements Deque<E>, Serializable, Cloneable {
             } else if (h(e.left) + 2 == h(e.right)) {
                 Node<E> p = e.parent;
                 Node<E> subroot =
-                        (h(e.right.right) >= h(e.right.left)) ?
-                            leftRotate(e) :
-                            rightLeftRotate(e);
+                        (h(e.right.right) >= h(e.right.left))
+                        ? leftRotate(e)
+                        : rightLeftRotate(e);
 
                 if (p == null) {
                     root = subroot;
@@ -1150,16 +1131,36 @@ implements Deque<E>, Serializable, Cloneable {
     }
 
     private class AscendingListIterator implements ListIterator<E> {
+
         private long expectedModCount = TreeList.this.modCount;
         private Node<E> currentNode = TreeList.this.firstNode;
         private int currentIndex;
         private int totalIndex;
 
-        AscendingListIterator(Node<E> initialNode,
-                              int initialCurrentIndex,
-                              int initialTotalIndex) {
-            this.currentNode = initialNode;
-            this.currentIndex = initialCurrentIndex;
+        AscendingListIterator(int index) {
+            if (TreeList.this.size == 0) {
+                return;
+            }
+
+            Node<E> node = root;
+            int initialTotalIndex = 0;
+
+            for (;;) {
+                if (index < node.leftCount) {
+                    node = node.left;
+                } else if (index >= node.leftCount + node.size()) {
+                    index -= node.leftCount + node.size();
+                    initialTotalIndex += node.leftCount + node.size();
+                    node = node.right;
+                } else {
+                    index -= node.leftCount;
+                    initialTotalIndex += index;
+                    break;
+                }
+            }
+
+            this.currentNode = node;
+            this.currentIndex = index;
             this.totalIndex = initialTotalIndex;
         }
 
@@ -1236,9 +1237,58 @@ implements Deque<E>, Serializable, Cloneable {
         private void checkModCount() {
             if (this.expectedModCount != TreeList.this.modCount) {
                 throw new ConcurrentModificationException(
-                        "This TreeList is modified while iterating."
-                        );
+                        "This TreeList is modified while iterating.");
             }
+        }
+    }
+
+    private class DescendingIterator implements Iterator<E> {
+
+        private Node<E> currentNode = TreeList.this.lastNode;
+        private int currentIndex = currentNode.size();
+        private int lastIndex = -1;
+        private int totalIndex = TreeList.this.size();
+
+        @Override
+        public boolean hasNext() {
+            return totalIndex > 0;
+        }
+
+        @Override
+        public E next() {
+            if (hasNext() == false) {
+                throw new NoSuchElementException("No next element available.");
+            }
+
+            --totalIndex;
+            --currentIndex;
+            lastIndex = currentIndex;
+
+            if (currentIndex == -1) {
+                currentNode = currentNode.predecessor();
+                currentIndex = currentNode.size() - 1;
+            }
+
+            return (E) currentNode.array[currentNode.first + currentIndex];
+        }
+
+        @Override
+        public void remove() {
+            if (lastIndex == -1) {
+                throw new NoSuchElementException(
+                        "An element is removed two times.");
+            }
+
+            currentNode.remove(lastIndex);
+
+            if (currentNode.size() == 0) {
+                Node<E> nextNode = currentNode.predecessor();
+                Node<E> removedNode = removeImpl(currentNode);
+                currentNode = nextNode;
+                fixAfterDeletion(currentNode);
+            }
+
+            lastIndex = -1;
         }
     }
 }
