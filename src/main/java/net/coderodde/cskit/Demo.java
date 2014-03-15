@@ -63,6 +63,7 @@ import net.coderodde.cskit.sorting.HeapSort;
 import net.coderodde.cskit.ds.list.TreeList;
 import net.coderodde.cskit.graph.p2psp.general.BHPAFinder;
 import net.coderodde.cskit.graph.p2psp.general.WhangboFinder;
+import net.coderodde.cskit.graph.p2psp.general.FastSuboptimalFinder;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -596,13 +597,34 @@ public class Demo{
                 + " ms, " + "path connected: " + isConnectedPath(path4)
                 + ", cost: " + getPathCost(path5, triple.second));
 
+        GeneralPathFinder finder6 =
+                new FastSuboptimalFinder(OPEN,
+                               new EuclidianMetric(
+                                    triple.third,
+                                    target),
+                               new EuclidianMetric(
+                                    triple.third,
+                                    source));
+
+        ta = System.currentTimeMillis();
+
+        List<DirectedGraphNode> path6 =
+                finder6.find(source, target, triple.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("FastSuboptimalFinder in " + (tb - ta)
+                + " ms, " + "path connected: " + isConnectedPath(path4)
+                + ", cost: " + getPathCost(path6, triple.second));
+
         line();
 
         System.out.println("Path are same: " + pathsAreSame(path1,
                                                             path2,
                                                             path3,
                                                             path4,
-                                                            path5));
+                                                            path5,
+                                                            path6));
 
         line();
     }
@@ -610,7 +632,7 @@ public class Demo{
     private static void profileShortestPathAlgorithms() {
         final int N = 2000;
         final float LOAD_FACTOR = 10.0f / N;
-        title("General shortest path algoirhtms with " + N + " nodes");
+        title("General shortest path algorihtms with " + N + " nodes");
 
         PriorityQueue<DirectedGraphNode, Double> pq =
                 new BinaryHeap<DirectedGraphNode, Double>();
