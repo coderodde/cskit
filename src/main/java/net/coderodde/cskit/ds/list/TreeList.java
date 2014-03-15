@@ -355,7 +355,7 @@ public class TreeList<E>
         for (;;) {
             if (index < n.leftCount) {
                 n = n.left;
-            } else if (index >= n.leftCount + n.size()) {
+            } else if (index > n.leftCount + n.size()) {
                 index -= n.leftCount + n.size();
                 n = n.right;
             } else {
@@ -1246,8 +1246,8 @@ public class TreeList<E>
 
         private Node<E> currentNode = TreeList.this.lastNode;
         private int currentIndex = currentNode.size();
-        private int lastIndex = -1;
         private int totalIndex = TreeList.this.size();
+        private boolean removed = false;
 
         @Override
         public boolean hasNext() {
@@ -1262,7 +1262,7 @@ public class TreeList<E>
 
             --totalIndex;
             --currentIndex;
-            lastIndex = currentIndex;
+            removed = false;
 
             if (currentIndex == -1) {
                 currentNode = currentNode.predecessor();
@@ -1274,21 +1274,14 @@ public class TreeList<E>
 
         @Override
         public void remove() {
-            if (lastIndex == -1) {
+            if (removed) {
                 throw new NoSuchElementException(
-                        "An element is removed two times.");
+                        "An element is tried to be removed second time."
+                        );
             }
 
-            currentNode.remove(lastIndex);
-
-            if (currentNode.size() == 0) {
-                Node<E> nextNode = currentNode.predecessor();
-                Node<E> removedNode = removeImpl(currentNode);
-                currentNode = nextNode;
-                fixAfterDeletion(currentNode);
-            }
-
-            lastIndex = -1;
+            TreeList.this.remove(totalIndex);
+            removed = true;
         }
     }
 }

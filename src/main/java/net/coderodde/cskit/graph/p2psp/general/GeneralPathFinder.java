@@ -22,6 +22,8 @@ public abstract class GeneralPathFinder {
     protected Set<DirectedGraphNode> CLOSED;
     protected Map<DirectedGraphNode, Double> GSCORE_MAP;
     protected Map<DirectedGraphNode, DirectedGraphNode> PARENT_MAP;
+    protected DirectedGraphNode source;
+    protected DirectedGraphNode target;
 
     public GeneralPathFinder(PriorityQueue<DirectedGraphNode, Double> OPEN) {
         this.OPEN = OPEN;

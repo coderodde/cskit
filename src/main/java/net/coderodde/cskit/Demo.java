@@ -61,6 +61,8 @@ import net.coderodde.cskit.graph.mst.MinimumSpanningTreeFinder;
 import net.coderodde.cskit.graph.mst.PrimMSTFinder;
 import net.coderodde.cskit.sorting.HeapSort;
 import net.coderodde.cskit.ds.list.TreeList;
+import net.coderodde.cskit.graph.p2psp.general.BHPAFinder;
+import net.coderodde.cskit.graph.p2psp.general.WhangboFinder;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -69,7 +71,7 @@ public class Demo{
 
     public static void main(String... args) {
 //        debugTreeList();
-        debugTreeList3();
+//        debugTreeList3();
 //        profileTreeList();
 //        profileObjectSortingAlgorithms(new BatchersSort<Integer>(),
 //                                       new CombSort<Integer>(),
@@ -83,7 +85,7 @@ public class Demo{
 //                                       new HeapSort<Integer>(
 //                                            new FibonacciHeap<Integer, Integer>())
 //                );
-//        profileShortestPathAlgorithms();
+        profileShortestPathAlgorithms();
 //        profileBreadthFirstSearchAlgorithms();
 //        profileOrderStatisticTree();
 //        profileMaxFlowAlgorithms();
@@ -554,9 +556,53 @@ public class Demo{
                 + " ms, " + "path connected: " + isConnectedPath(path3)
                 + ", cost: " + getPathCost(path3, triple.second));
 
+        GeneralPathFinder finder4 =
+                new BHPAFinder(OPEN,
+                               new EuclidianMetric(
+                                    triple.third,
+                                    target),
+                               new EuclidianMetric(
+                                    triple.third,
+                                    source));
+
+        ta = System.currentTimeMillis();
+
+        List<DirectedGraphNode> path4 =
+                finder4.find(source, target, triple.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("BHPAFinder in " + (tb - ta)
+                + " ms, " + "path connected: " + isConnectedPath(path4)
+                + ", cost: " + getPathCost(path4, triple.second));
+
+        GeneralPathFinder finder5 =
+                new WhangboFinder(OPEN,
+                               new EuclidianMetric(
+                                    triple.third,
+                                    target),
+                               new EuclidianMetric(
+                                    triple.third,
+                                    source));
+
+        ta = System.currentTimeMillis();
+
+        List<DirectedGraphNode> path5 =
+                finder5.find(source, target, triple.second);
+
+        tb = System.currentTimeMillis();
+
+        System.out.println("WhangboFinder in " + (tb - ta)
+                + " ms, " + "path connected: " + isConnectedPath(path4)
+                + ", cost: " + getPathCost(path5, triple.second));
+
         line();
 
-        System.out.println("Path are same: " + pathsAreSame(path1, path2, path3));
+        System.out.println("Path are same: " + pathsAreSame(path1,
+                                                            path2,
+                                                            path3,
+                                                            path4,
+                                                            path5));
 
         line();
     }
@@ -1045,46 +1091,37 @@ public class Demo{
     }
 
     private static void debugTreeList3() {
-        TreeList<Integer> list = new TreeList<Integer>(3);
-
-        list.clear();
-
-        for (int i = 0; i < 100; ++i) {
-            list.add(i);
+        TreeList<Integer> list = new TreeList<Integer>(3);for (int i = 0; i < 40; ++i) {
+            list.add(i, i);
         }
 
-        System.out.println("Funkeeh?: " + list.isHealthy());
+        Iterator<Integer> it = list.descendingIterator();
 
-        Iterator<Integer> iter = list.iterator();
-        Integer i = 0;
+        System.out.println(it.hasNext());
 
-        while (iter.hasNext()) {
-            System.out.println(i);
-            System.out.println((i++) + ", " + iter.next());
+        it.next();
+        Integer tmp = it.next();
+
+        System.out.println(new Integer(38).equals(tmp));
+
+        it.remove();
+
+        System.out.println(new Integer(39).equals(list.get(list.size() - 1)));
+        System.out.println(new Integer(37).equals(list.get(list.size() - 2)));
+        System.out.println("Healthy: " + list.isHealthy());
+
+
+        System.out.println("Moving...");
+        for (int i = 0; i < 19; ++i) {
+            System.out.println(it.hasNext());
+            it.next();
         }
 
-        Iterator<Integer> descIter = list.descendingIterator();
-
-        i = 99;
-
-        while (i >= 0) {
-            System.out.println(i);
-            System.out.println(i + ", " + descIter.next());
-            --i;
+        for (int i = 0; i < 6; ++i) {
+            System.out.println(it.hasNext() + " at " + i);
+            it.next();
+            it.remove();
+            System.out.println("Healthy: " + list.isHealthy());
         }
-
-        System.out.println(descIter.hasNext());
-
-        list.clear();
-
-        Iterator<Integer> i1 = list.iterator();
-        System.out.println(i1.hasNext());
-
-        Iterator<Integer> i2 = list.descendingIterator();
-        System.out.println(i2.hasNext());
-
-        ListIterator<Integer> i3 = list.listIterator();
-        System.out.println(i3.hasNext());
-        System.out.println(i3.hasPrevious());
     }
 }

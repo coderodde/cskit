@@ -71,122 +71,37 @@ public class TreeListTest {
     }
 
     @Test
-    public void testAddFirst() {
-    }
-
-    @Test
-    public void testAddLast() {
-    }
-
-    @Test
-    public void testAdd_int_GenericType() {
-    }
-
-    @Test
-    public void testGet() {
-    }
-
-    @Test
-    public void testSet() {
-    }
-
-    @Test
-    public void testSize() {
-    }
-
-    @Test
-    public void testClear() {
-    }
-
-    @Test
-    public void testOfferFirst() {
-    }
-
-    @Test
-    public void testOfferLast() {
-    }
-
-    @Test
-    public void testRemoveFirst() {
-    }
-
-    @Test
-    public void testRemoveLast() {
-    }
-
-    @Test
-    public void testRemove_int() {
-    }
-
-    @Test
-    public void testPollFirst() {
-    }
-
-    @Test
-    public void testPollLast() {
-    }
-
-    @Test
-    public void testGetFirst() {
-    }
-
-    @Test
-    public void testGetLast() {
-    }
-
-    @Test
-    public void testPeekFirst() {
-    }
-
-    @Test
-    public void testPeekLast() {
-    }
-
-    @Test
-    public void testRemoveFirstOccurrence() {
-    }
-
-    @Test
-    public void testRemoveLastOccurrence() {
-    }
-
-    @Test
-    public void testOffer() {
-    }
-
-    @Test
-    public void testRemove_0args() {
-    }
-
-    @Test
-    public void testPoll() {
-    }
-
-    @Test
-    public void testElement() {
-    }
-
-    @Test
-    public void testPeek() {
-    }
-
-    @Test
-    public void testPush() {
-    }
-
-    @Test
-    public void testPop() {
-    }
-
-    @Test
-    public void testIterator() {
-    }
-
-    @Test
     public void testDescendingIterator() {
-    }
+        for (int i = 0; i < 40; ++i) {
+            list.add(i, i);
+        }
 
-    @Test
-    public void testIsHealthy() {
+        Iterator<Integer> it = list.descendingIterator();
+
+        assertTrue(it.hasNext());
+
+        it.next();
+        Integer tmp = it.next();
+
+        assertEquals(new Integer(38), tmp);
+
+        it.remove();
+
+        assertEquals(39, list.size());
+        assertEquals(new Integer(39), list.get(list.size() - 1));
+        assertEquals(new Integer(37), list.get(list.size() - 2));
+        assertTrue(list.isHealthy());
+
+        for (int i = 0; i < 19; ++i) {
+            assertTrue(it.hasNext());
+            it.next();
+        }
+
+        for (int i = 0; i < 6; ++i) {
+            assertTrue(it.hasNext());
+            it.next();
+            it.remove();
+            assertTrue(list.isHealthy());
+        }
     }
 }
