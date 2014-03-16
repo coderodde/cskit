@@ -11,9 +11,8 @@ import net.coderodde.cskit.graph.DirectedGraphNode;
 import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
 
 /**
- * This class implements a bidirectional <tt>A*</tt>-search algorithm due to
- * Taeg-Keun Whangbo (Efficient Modified Bidirectional A∗ Algorithm for Optimal
- * Route-Finding.)
+ * This class implements a bidirectional <tt>A*</tt>-search algorithm that is
+ * fast yet suboptimal in general case.
  *
  * @author Rodion Efremov
  * @version 1.618 (16.12.2013)
@@ -83,7 +82,7 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
 //                           GSCORE_MAP.get(OPEN2.min()) > m) {
 //                    return tracebackPathBidirectional(touch,
 //                                                      PARENT_MAP,
-//                                                      PARENT_MAP2);
+//                                                          PARENT_MAP2);
 //                }
                 double L1 = GSCORE_MAP.get(touch);
                 double L2 = GSCORE_MAP2.get(touch);

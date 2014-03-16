@@ -87,7 +87,7 @@ public class Demo{
 //                                            new FibonacciHeap<Integer, Integer>())
 //                );
         profileShortestPathAlgorithms();
-//        profileBreadthFirstSearchAlgorithms();
+        profileBreadthFirstSearchAlgorithms();
 //        profileOrderStatisticTree();
 //        profileMaxFlowAlgorithms();
 //        profileMSTAlgorithms();
@@ -619,12 +619,12 @@ public class Demo{
 
         line();
 
-        System.out.println("Path are same: " + pathsAreSame(path1,
-                                                            path2,
-                                                            path3,
-                                                            path4,
-                                                            path5,
-                                                            path6));
+        System.out.println("Paths are same: " + pathsAreSame(path1,
+                                                             path2,
+                                                             path3,
+                                                             path4,
+                                                             path5,
+                                                             path6));
 
         line();
     }
