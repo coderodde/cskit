@@ -70,6 +70,21 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
         while ((OPEN.isEmpty() == false) && (OPEN2.isEmpty() == false)) {
 
             if (touch != null) {
+//                if (CLOSED2.contains(OPEN.min())
+//                        && GSCORE_MAP.get(OPEN.min()) +
+//                           GSCORE_MAP2.get(OPEN.min()) > m) {
+//                    return tracebackPathBidirectional(touch,
+//                                                      PARENT_MAP,
+//                                                      PARENT_MAP2);
+//                }
+//
+//                if (CLOSED.contains(OPEN2.min())
+//                        && GSCORE_MAP.get(OPEN2.min()) +
+//                           GSCORE_MAP.get(OPEN2.min()) > m) {
+//                    return tracebackPathBidirectional(touch,
+//                                                      PARENT_MAP,
+//                                                      PARENT_MAP2);
+//                }
                 double L1 = GSCORE_MAP.get(touch);
                 double L2 = GSCORE_MAP2.get(touch);
 
@@ -149,6 +164,12 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
                     }
                 }
             }
+        }
+
+        if (touch != null) {
+            return tracebackPathBidirectional(touch,
+                                              PARENT_MAP,
+                                              PARENT_MAP2);
         }
 
         return java.util.Collections.<DirectedGraphNode>emptyList();
