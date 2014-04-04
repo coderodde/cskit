@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import net.coderodde.cskit.Utilities.Pair;
+import net.coderodde.cskit.Utilities.Triple;
 import static net.coderodde.cskit.Utilities.Triple;
 import static net.coderodde.cskit.Utilities.allWeakEquals;
 import static net.coderodde.cskit.Utilities.debugPrintArray;
@@ -26,30 +27,13 @@ import static net.coderodde.cskit.Utilities.spanningTreesEqual;
 import static net.coderodde.cskit.Utilities.sumEdgeWeights;
 import static net.coderodde.cskit.Utilities.title;
 import static net.coderodde.cskit.Utilities.title2;
+import net.coderodde.cskit.ds.list.TreeList;
 import net.coderodde.cskit.ds.pq.BinaryHeap;
 import net.coderodde.cskit.ds.pq.FibonacciHeap;
 import net.coderodde.cskit.ds.pq.PriorityQueue;
+import net.coderodde.cskit.ds.tree.OrderStatisticTree;
 import net.coderodde.cskit.graph.DirectedGraphNode;
 import net.coderodde.cskit.graph.DirectedGraphWeightFunction;
-import net.coderodde.cskit.graph.p2psp.general.AStarFinder;
-import net.coderodde.cskit.graph.p2psp.general.BidirectionalDijkstraFinder;
-import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
-import net.coderodde.cskit.graph.p2psp.general.DijkstraFinder;
-import net.coderodde.cskit.graph.p2psp.general.EuclidianMetric;
-import net.coderodde.cskit.graph.p2psp.general.GeneralPathFinder;
-import net.coderodde.cskit.graph.p2psp.uniform.BidirectionalBreadthFirstSearchFinder;
-import net.coderodde.cskit.graph.p2psp.uniform.BreadthFirstSearchFinder;
-import net.coderodde.cskit.graph.p2psp.uniform.ParallelBidirectionalBFSFinder;
-import net.coderodde.cskit.graph.p2psp.uniform.UniformCostPathFinder;
-import net.coderodde.cskit.sorting.BatchersSort;
-import net.coderodde.cskit.sorting.CombSort;
-import net.coderodde.cskit.sorting.CountingSort;
-import net.coderodde.cskit.sorting.HeapSelectionSort;
-import net.coderodde.cskit.sorting.IterativeMergeSort;
-import net.coderodde.cskit.sorting.NaturalMergeSort;
-import net.coderodde.cskit.sorting.ObjectSortingAlgorithm;
-import net.coderodde.cskit.sorting.TreeSort;
-import net.coderodde.cskit.ds.tree.OrderStatisticTree;
 import net.coderodde.cskit.graph.UndirectedGraphEdge;
 import net.coderodde.cskit.graph.UndirectedGraphNode;
 import net.coderodde.cskit.graph.UndirectedGraphWeightFunction;
@@ -59,11 +43,28 @@ import net.coderodde.cskit.graph.flow.FlowFinder;
 import net.coderodde.cskit.graph.mst.KruskalMSTFinder;
 import net.coderodde.cskit.graph.mst.MinimumSpanningTreeFinder;
 import net.coderodde.cskit.graph.mst.PrimMSTFinder;
-import net.coderodde.cskit.sorting.HeapSort;
-import net.coderodde.cskit.ds.list.TreeList;
+import net.coderodde.cskit.graph.p2psp.general.AStarFinder;
 import net.coderodde.cskit.graph.p2psp.general.BHPAFinder;
-import net.coderodde.cskit.graph.p2psp.general.WhangboFinder;
+import net.coderodde.cskit.graph.p2psp.general.BidirectionalDijkstraFinder;
+import net.coderodde.cskit.graph.p2psp.general.CoordinateMap;
+import net.coderodde.cskit.graph.p2psp.general.DijkstraFinder;
+import net.coderodde.cskit.graph.p2psp.general.EuclidianMetric;
 import net.coderodde.cskit.graph.p2psp.general.FastSuboptimalFinder;
+import net.coderodde.cskit.graph.p2psp.general.GeneralPathFinder;
+import net.coderodde.cskit.graph.p2psp.general.WhangboFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.BreadthFirstSearchFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.BidirectionalBFSFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.ParallelBidirectionalBFSFinder;
+import net.coderodde.cskit.graph.p2psp.uniform.UniformCostPathFinder;
+import net.coderodde.cskit.sorting.BatchersSort;
+import net.coderodde.cskit.sorting.CombSort;
+import net.coderodde.cskit.sorting.CountingSort;
+import net.coderodde.cskit.sorting.HeapSelectionSort;
+import net.coderodde.cskit.sorting.HeapSort;
+import net.coderodde.cskit.sorting.IterativeMergeSort;
+import net.coderodde.cskit.sorting.NaturalMergeSort;
+import net.coderodde.cskit.sorting.ObjectSortingAlgorithm;
+import net.coderodde.cskit.sorting.TreeSort;
 
 /**
  * Hello from cskit. This is a performance demo.
@@ -86,7 +87,7 @@ public class Demo{
 //                                       new HeapSort<Integer>(
 //                                            new FibonacciHeap<Integer, Integer>())
 //                );
-        profileShortestPathAlgorithms();
+//        profileShortestPathAlgorithms();
         profileBreadthFirstSearchAlgorithms();
 //        profileOrderStatisticTree();
 //        profileMaxFlowAlgorithms();
@@ -243,7 +244,7 @@ public class Demo{
         title("Uniform cost graph search");
         final long SEED = System.currentTimeMillis();
         final Random r = new Random(SEED);
-        final int SIZE = 50010;
+        final int SIZE = 100000;
         final float LOAD_FACTOR = 5.5f / SIZE;
 
         System.out.println("Nodes in the graph: " + SIZE + ", load factor: "
@@ -261,11 +262,11 @@ public class Demo{
                 new BreadthFirstSearchFinder();
 
         UniformCostPathFinder finder2 =
-                new BidirectionalBreadthFirstSearchFinder();
+                new BidirectionalBFSFinder();
 
         UniformCostPathFinder finder3 =
                 new ParallelBidirectionalBFSFinder();
-
+        
         long ta = System.currentTimeMillis();
         List<DirectedGraphNode> path1 = finder1.find(source, target);
         long tb = System.currentTimeMillis();
@@ -276,7 +277,7 @@ public class Demo{
         List<DirectedGraphNode> path2 = finder2.find(source, target);
         tb = System.currentTimeMillis();
 
-        System.out.println("BidirectionalBreadthFirstSearchFinder in "
+        System.out.println("BidirectionalBFSFinder in "
                 + (tb - ta) + " ms.");
 
         ta = System.currentTimeMillis();
@@ -285,7 +286,7 @@ public class Demo{
 
         System.out.println("ParallelBidirectionalBFSFinder in "
                 + (tb - ta) + " ms.");
-
+        
         line();
 
         boolean eq = path1.size() == path2.size()
@@ -312,14 +313,12 @@ public class Demo{
                 && path3.get(0).equals(source)
                 && path3.get(path3.size() - 1).equals(target));
 
-
-
         System.out.println("Breadth-first search path OK: " + ok1);
         System.out.println("Bidirectional breadth-first search path OK: "
                 + ok2);
         System.out.println("Bidirectional parallel BFS path OK: "
                 + ok3);
-
+        
         line();
 
         System.gc();
@@ -630,15 +629,15 @@ public class Demo{
     }
 
     private static void profileShortestPathAlgorithms() {
-        final int N = 2000;
+        final int N = 20000;
         final float LOAD_FACTOR = 10.0f / N;
-        title("General shortest path algorihtms with " + N + " nodes");
-
-        PriorityQueue<DirectedGraphNode, Double> pq =
-                new BinaryHeap<DirectedGraphNode, Double>();
-
         final long SEED = System.currentTimeMillis();
 
+        /*
+         * Seed 1396252274440L, 1396255300780L produces an invalid result in BHPA.
+         */
+
+        title("General shortest path algorihtms with " + N + " nodes");
         System.out.println("Seed: " + SEED);
 
         profileShortestPathAlgorithmsOn(

@@ -67,23 +67,7 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
         DirectedGraphNode touch = null;
 
         while ((OPEN.isEmpty() == false) && (OPEN2.isEmpty() == false)) {
-
             if (touch != null) {
-//                if (CLOSED2.contains(OPEN.min())
-//                        && GSCORE_MAP.get(OPEN.min()) +
-//                           GSCORE_MAP2.get(OPEN.min()) > m) {
-//                    return tracebackPathBidirectional(touch,
-//                                                      PARENT_MAP,
-//                                                      PARENT_MAP2);
-//                }
-//
-//                if (CLOSED.contains(OPEN2.min())
-//                        && GSCORE_MAP.get(OPEN2.min()) +
-//                           GSCORE_MAP.get(OPEN2.min()) > m) {
-//                    return tracebackPathBidirectional(touch,
-//                                                      PARENT_MAP,
-//                                                          PARENT_MAP2);
-//                }
                 double L1 = GSCORE_MAP.get(touch);
                 double L2 = GSCORE_MAP2.get(touch);
 
@@ -105,7 +89,7 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
                 double tmpg = GSCORE_MAP.get(current) + w.get(current, child);
 
                 if (GSCORE_MAP.containsKey(child) == false) {
-                    OPEN.insert(child, tmpg);
+                    OPEN.insert(child, tmpg + h.get(child));
                     GSCORE_MAP.put(child, tmpg);
                     PARENT_MAP.put(child, current);
 
@@ -116,7 +100,7 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
                         }
                     }
                 } else if (tmpg < GSCORE_MAP.get(child)) {
-                    OPEN.decreasePriority(child, tmpg);
+                    OPEN.decreasePriority(child, tmpg + h.get(child));
                     GSCORE_MAP.put(child, tmpg);
                     PARENT_MAP.put(child, current);
 
@@ -140,7 +124,7 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
                 double tmpg = GSCORE_MAP2.get(current) + w.get(parent, current);
 
                 if (GSCORE_MAP2.containsKey(parent) == false) {
-                    OPEN2.insert(parent, tmpg);
+                    OPEN2.insert(parent, tmpg + h2.get(parent));
                     GSCORE_MAP2.put(parent, tmpg);
                     PARENT_MAP2.put(parent, current);
 
@@ -151,7 +135,7 @@ public class FastSuboptimalFinder extends GeneralPathFinder {
                         }
                     }
                 } else if (tmpg < GSCORE_MAP2.get(parent)) {
-                    OPEN2.decreasePriority(parent, tmpg);
+                    OPEN2.decreasePriority(parent, tmpg + h2.get(parent));
                     GSCORE_MAP2.put(parent, tmpg);
                     PARENT_MAP2.put(parent, current);
 

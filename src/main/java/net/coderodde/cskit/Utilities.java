@@ -501,17 +501,17 @@ public class Utilities {
         ArrayList<DirectedGraphNode> graph =
                 new ArrayList<DirectedGraphNode>(size);
         DirectedGraphWeightFunction w = new DirectedGraphWeightFunction();
-        CoordinateMap m = new CoordinateMap(4, size);
+        CoordinateMap m = new CoordinateMap(2, size);
 
         for (int i = 0; i < size; ++i) {
             DirectedGraphNode u = new DirectedGraphNode("" + i);
             graph.add(u);
-            m.put(u, getRandomCoordinates(4, r, 1000));
+            m.put(u, getRandomCoordinates(2, r, 1000));
         }
 
         for (int i = 0; i < size; ++i) {
             for (int j = 0; j < size; ++j) {
-                if (elf < r.nextFloat()) {
+                if (r.nextFloat() < elf) {
                     graph.get(i).addChild(graph.get(j));
                     w.put(graph.get(i),
                           graph.get(j),

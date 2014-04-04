@@ -32,6 +32,7 @@ public class BHPAFinder extends GeneralPathFinder {
         super(OPEN);
         this.h = h;
         this.h2 = h2;
+
         OPEN2 = OPEN.newInstance();
         CLOSED2 = new HashSet<DirectedGraphNode>();
         GSCORE_MAP2 = new HashMap<DirectedGraphNode, Double>();
@@ -66,13 +67,15 @@ public class BHPAFinder extends GeneralPathFinder {
         DirectedGraphNode touch = null;
 
         while ((OPEN.isEmpty() == false) && (OPEN2.isEmpty() == false)) {
-            double f1 = GSCORE_MAP.get(OPEN.min()) + h.get(OPEN.min());
-            double f2 = GSCORE_MAP2.get(OPEN2.min()) + h.get(OPEN2.min());
+            if (touch != null) {
+                double f1 = GSCORE_MAP.get(OPEN.min()) + h.get(OPEN.min());
+                double f2 = GSCORE_MAP2.get(OPEN2.min()) + h2.get(OPEN2.min());
 
-            if (m <= Math.max(f1, f2)) {
-                return tracebackPathBidirectional(touch,
-                                                  PARENT_MAP,
-                                                  PARENT_MAP2);
+                if (m <= Math.max(f1, f2)) {
+                    return tracebackPathBidirectional(touch,
+                                                      PARENT_MAP,
+                                                      PARENT_MAP2);
+                }
             }
 
             DirectedGraphNode current = OPEN.extractMinimum();
@@ -86,7 +89,7 @@ public class BHPAFinder extends GeneralPathFinder {
                 double tmpg = GSCORE_MAP.get(current) + w.get(current, child);
 
                 if (GSCORE_MAP.containsKey(child) == false) {
-                    OPEN.insert(child, tmpg);
+                    OPEN.insert(child, tmpg + h.get(child));
                     GSCORE_MAP.put(child, tmpg);
                     PARENT_MAP.put(child, current);
 
@@ -97,7 +100,7 @@ public class BHPAFinder extends GeneralPathFinder {
                         }
                     }
                 } else if (tmpg < GSCORE_MAP.get(child)) {
-                    OPEN.decreasePriority(child, tmpg);
+                    OPEN.decreasePriority(child, tmpg + h.get(child));
                     GSCORE_MAP.put(child, tmpg);
                     PARENT_MAP.put(child, current);
 
@@ -121,7 +124,7 @@ public class BHPAFinder extends GeneralPathFinder {
                 double tmpg = GSCORE_MAP2.get(current) + w.get(parent, current);
 
                 if (GSCORE_MAP2.containsKey(parent) == false) {
-                    OPEN2.insert(parent, tmpg);
+                    OPEN2.insert(parent, tmpg + h2.get(parent));
                     GSCORE_MAP2.put(parent, tmpg);
                     PARENT_MAP2.put(parent, current);
 
@@ -132,7 +135,7 @@ public class BHPAFinder extends GeneralPathFinder {
                         }
                     }
                 } else if (tmpg < GSCORE_MAP2.get(parent)) {
-                    OPEN2.decreasePriority(parent, tmpg);
+                    OPEN2.decreasePriority(parent, tmpg + h2.get(parent));
                     GSCORE_MAP2.put(parent, tmpg);
                     PARENT_MAP2.put(parent, current);
 
@@ -146,6 +149,8 @@ public class BHPAFinder extends GeneralPathFinder {
             }
         }
 
-        return java.util.Collections.<DirectedGraphNode>emptyList();
+        return touch == null ?
+                java.util.Collections.<DirectedGraphNode>emptyList() :
+                tracebackPathBidirectional(touch, PARENT_MAP, PARENT_MAP2);
     }
 }
